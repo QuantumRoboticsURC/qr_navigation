@@ -23,51 +23,49 @@ row = 0 #A partir de que waypoint va a iniciar
 roll = pitch = yaw = 0.0
 target_angle = 0.0
 zed_angle = 0.0
-kp = -0.1
+kp = -0.2
 distance = 0.0
 error = 0
-sat = 0.1
+sat = 0.2
 
 def callback(data):
     global row, roll, pitch, yaw, target_angle, zed_angle, distance, row # Se agrego ROW
-		file = open("/home/quantum/catkin_ws/src/qr_navigation/scripts/csv_files/2.csv")
-		csvreader = csv.reader(file)
-		#header = next(csvreader)
-		#print(header)
-		csvreader = csv.reader(file)
-		rows = list(csvreader)
-		
-		if (row <= len(rows)):
-		    latitude = float(rows[row][1])
-		    longitude = float(rows[row][2])
-		    delta_lat = latitude-data.pose.pose.position.x
-		    delta_long = longitude-data.pose.pose.position.y
-		    orientation_q = data.pose.pose.orientation
-		    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-		    (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
-		    zed_angle = yaw*180/math.pi
-		    target_angle = -math.atan2(delta_long, delta_lat)*180/math.pi
-		    error = target_angle - zed_angle         
-		    distance = ((delta_lat**2 + delta_long**2)**0.5)*108000
-		    #print (distance)
-		    if (distance < 2): #Se comento
+    file = open("/home/quantum_main/catkin_ws/src/qr_navigation/scripts/csv_files/dos.csv")
+    csvreader = csv.reader(file)
+    #header = next(csvreader)
+    #print(heade
+    csvreader = csv.reader(file)
+    rows = list(csvreader)
+    if (row <= len(rows)):
+        latitude = float(rows[row][1])
+        longitude = float(rows[row][2])
+        delta_lat = latitude-data.pose.pose.position.x
+        delta_long = longitude-data.pose.pose.position.y
+        orientation_q = data.pose.pose.orientation
+        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+        (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
+        zed_angle = yaw*180/math.pi
+        target_angle = -math.atan2(delta_long, delta_lat)*180/math.pi
+        error = target_angle - zed_angle         
+        distance = ((delta_lat**2 + delta_long**2)**0.5)*108000
+        #print (distance)
+        if (distance < 1): #Se comento
+            row += 1          #Se comento
+            command = Twist()
+            command.linear.x = 0
+            command.angular.z = 0
+            pub.publish(command)
+            print("Siguiente checkpoint")
+            #time.sleep(10)          
 
-		        row += 1          #Se comento
-		        command = Twist()
-		        command.linear.x = 0
-		        command.angular.z = 0
-		        pub.publish(command)
-		        print("Siguiente checkpoint")
-		        #time.sleep(10)          
-
-		        
-	#        print ("Posicion actual        : Lat ", data.pose.pose.position.x, ", Long: ", data.pose.pose.position.y)
-	#        print ("Posicion objetivo      : Lat ", rows[row][1], ", Long: ", rows[row][2])
-	#        print ("Angulo de actual (ZED) : ", zed_angle)
-	#        print ("Angulo objetivo        : ", target_angle)
-	#        print ("Distancia              : ", distance)
-	#        print ()
-		    file.close()
+    
+        #        print ("Posicion actual        : Lat ", data.pose.pose.position.x, ", Long: ", data.pose.pose.position.y)
+        #        print ("Posicion objetivo      : Lat ", rows[row][1], ", Long: ", rows[row][2])
+        #        print ("Angulo de actual (ZED) : ", zed_angle)
+        #        print ("Angulo objetivo        : ", target_angle)
+        #        print ("Distancia              : ", distance)
+        #        print ()
+        file.close() 
     else:
         print ("Termine")
         rospy.is_shutdown()
@@ -88,17 +86,15 @@ while not rospy.is_shutdown():
     print (error)
     if (error > -5 and error < 5):
         if (distance < 6 and distance > 2 ):
-            command.linear.x = 0.08
+            command.linear.x = 0.12
             command.angular.z = 0.0
             print("Avanzando recto velocidad minima, distancia restante: ", distance)
        # elif (distance <= 2):
         #    print("Siguiente checkpoint")
-         #   time.sleep(5)
-
-                        
+         #   time.sleep(5)                   
 
         else:
-            command.linear.x = 0.1
+            command.linear.x = 0.18
             command.angular.z = 0.0
             print("Avanzando recto velocidad maxima, distancia restante: ", distance)
     else:
