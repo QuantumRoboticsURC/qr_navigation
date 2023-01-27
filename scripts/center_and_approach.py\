@@ -30,10 +30,10 @@ class CenterAndApproach():
     def main(self):
         while not rospy.is_shutdown():
             print(self.angle_error)
-            if abs(self.angle_error) > 15:  
+            if abs(self.angle_error) > 15:
                 self.command_velocity.linear.x = 0.0
                 self.command_velocity.angular.z = self.angle_error * self.kp_angle_error
-            
+
             else:
                 self.command_velocity.linear.x = self.distance_error * self.kp_distance_error
                 self.command_velocity.angular.z = 0.0
