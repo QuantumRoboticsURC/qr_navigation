@@ -53,7 +53,7 @@ class CenterAndApproach():
             self.command_velocity.linear.x = self.saturate_signal(candidate_linear_vel, 0.4)
             self.command_velocity.angular.z = self.saturate_signal(candidate_angular_vel * self.wheel_overshot_softener, 0.5)
             self.prev_angular_velocity = candidate_angular_vel                    
-            self.command_velocity_publisher.publish(self.command_velocity)
+            self.command_velocity_publisher.publish(self.command_velocity)        
 
 if __name__ == "__main__":
     center_and_approach = CenterAndApproach()
