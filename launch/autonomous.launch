@@ -1,9 +1,9 @@
 <launch>
   <node name="rotateWhileDetectingAr" pkg="qr_navigation" type="rotateWhileDetectingAr.py" output="screen"/>
-  <node name="detect_aruco_video2" pkg="zed_implementations" type="detectArucoVideo2.py" output="screen"/>
-  <node name="center_and_approach" pkg="qr_navigation" type="centerAndApproach.py" output="screen"/>
+  <node name="detect_aruco_video2" pkg="zed-implementations" type="detectArucoVideo2.py" output="screen"/>
+  <node name="center_and_approach" pkg="qr_navigation" type="center_and_approach.py" output="screen"/>
   <node name="talker_node" pkg="qr_navigation" type="navigationController.py" output="screen"/>
-  <node name="matrix" pkg="matrixImplementations" type="matrixImplementations.py" output="screen"/>  
+  <node name="matrix" pkg="matrix_implementations" type="matrixSignalReceiver.py" output="screen"/>  
 </launch>
 
 
