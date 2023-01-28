@@ -22,7 +22,7 @@ class CenterAndApproach():
         self.command_velocity = Twist()
         self.prev_angular_velocity = 0.0
         self.wheel_overshot_softener = 1.0
-        self.overshoot_softener_value_changed_time = None
+        self.overshoot_softener_value_changed_time = 0.0
 
     def aruco_position_callback(self, data):
         # we sum 320 to angle error signal an offset and allow us to have a set point of 0
@@ -30,9 +30,9 @@ class CenterAndApproach():
         self.distance_error = data.x - 1        
 
     def saturate_signal(self, signal, saturation_value):
-        if candidate_linear_vel > abs(saturation_value):
+        if signal > abs(saturation_value):
             result = abs(saturation_value)
-        elif candidate_linear_vel < -abs(saturation_value):
+        elif signal < -abs(saturation_value):
             result = -abs(saturation_value)
         else:
             result = signal
