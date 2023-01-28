@@ -30,7 +30,8 @@ class CenterAndApproach():
     def aruco_position_callback(self, data):
         # we sum 320 to angle error signal an offset and allow us to have a set point of 0
         self.angle_error = data.y + 320  
-        self.distance_error = data.x - 1        
+        #self.distance_error = data.x - 1
+        self.distance_error = data.x - 2.5        
 
     def saturate_signal(self, signal, saturation_value):
         if signal > abs(saturation_value):
