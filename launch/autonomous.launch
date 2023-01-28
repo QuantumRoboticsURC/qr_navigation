@@ -3,7 +3,7 @@
   <node name="detect_aruco_video2" pkg="zed-implementations" type="detect_aruco_video_2.py" output="screen"/>
   <node name="center_and_approach" pkg="qr_navigation" type="center_and_approach.py" output="screen"/>
   <!--<node name="talker_node" pkg="qr_navigation" type="NavigationController.py" output="screen"/>-->
-  <node name="matrix" pkg="matrix_implementations" type="MatrixSignalRecieiver.py" output="screen"/>  
+  <node name="matrix" pkg="matrix_implementations" type="MatrixSignalReciever.py" output="screen"/>  
 </launch>
 
 
