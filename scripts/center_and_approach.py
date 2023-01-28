@@ -43,7 +43,7 @@ class CenterAndApproach():
 
     def main(self):
         while not rospy.is_shutdown():
-            if abs(self.distance_error) > 0.1  and abs(self.angle_error) > 0.1:
+            if abs(self.distance_error) > 0.1  or abs(self.angle_error) > 0.1:
                 candidate_linear_vel = self.distance_error * self.kp_distance_error
                 candidate_angular_vel = self.angle_error * self.kp_angle_error
 
@@ -54,6 +54,7 @@ class CenterAndApproach():
                     self.wheel_overshot_softener = 0.1
                     self.overshoot_softener_value_changed_time = time.time()            
                 
+                self.wheel_overshot_softener = self.saturate_signal(self.wheel_overshot_softener, 1.0)
                 self.command_velocity.linear.x = self.saturate_signal(candidate_linear_vel, 0.4)
                 self.command_velocity.angular.z = self.saturate_signal(candidate_angular_vel * self.wheel_overshot_softener, 0.5)
                 self.prev_angular_velocity = candidate_angular_vel                    
