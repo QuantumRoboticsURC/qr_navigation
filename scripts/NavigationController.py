@@ -13,28 +13,17 @@ Notes:
 
 import rospy
 from geometry.msg import Point, Twist
-
+from std_msgs.msg import Bool
 
 class NavigationController():
-    def _init_(self):
+    def __init__(self):
         # ___ ros atributes initialization ___
         rospy.init_node("matrix_signal_reciever")
-        rospy.Subscriber("/closest_aruco_distance", Point, self.closest_aruco_callback, queue_size=1)
-        self.command_velocity_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+        rospy.Subscriber("/gps_arrived", Bool, self.arrived_to_point_signal_callback, queue_size=1)
+        rospy.Subscriber("/follow_gps_cmd_vel", Bool, self.arrived_to_point_signal_callback, queue_size=1)
+        self.command_velocity_publisher = rospy.Publisher('cmd_vel', Twist, queue_size=1)        
 
-        
-        # ___ gains initialization ___
-        self.kp_angle_error = 0.00125   # comes from .4[rad/s] = +-320 [max error pixels] * kpae 
-        self.kp_distance_error = 0.2    # comes from  1[rad/s] = +-5 [max error meters] * kpde
-
-        # ___ error initialization ___
-        self.angle_error = 0
-        self.distance_error = 0
-
-        # ___ vel command ___
-        self.command_velocity = Twist()
-
-    def closest_aruco_callback(self, data):
+    def arrived_to_point_signal_callback(self, data):
         self.angle_error = data.y + 320
         self.distance_error = data.x - 1
 
