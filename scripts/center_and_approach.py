@@ -43,7 +43,7 @@ class CenterAndApproach():
 
     def main(self):
         while not rospy.is_shutdown():
-            if abs(self.distance_error) > 0.1  and abs(self.angular_error) > 0.1:
+            if abs(self.distance_error) > 0.1  and abs(self.angle_error) > 0.1:
                 candidate_linear_vel = self.distance_error * self.kp_distance_error
                 candidate_angular_vel = self.angle_error * self.kp_angle_error
 
