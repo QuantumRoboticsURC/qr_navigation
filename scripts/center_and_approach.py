@@ -22,6 +22,7 @@ class CenterAndApproach():
         self.command_velocity = Twist()
         self.prev_angular_velocity = 0.0
         self.wheel_overshot_softener = 1.0
+        self.overshoot_softener_value_changed_time = None
 
     def aruco_position_callback(self, data):
         # we sum 320 to angle error signal an offset and allow us to have a set point of 0
