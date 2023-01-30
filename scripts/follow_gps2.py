@@ -23,14 +23,14 @@ row = 0 #A partir de que waypoint va a iniciar
 roll = pitch = yaw = 0.0
 target_angle = 0.0
 zed_angle = 0.0
-kp = -0.2
+kp = -0.3
 distance = 0.0
 error = 0
-sat = 0.2
+sat = 0.4
 
 def callback(data):
     global row, roll, pitch, yaw, target_angle, zed_angle, distance, row # Se agrego ROW
-    file = open("/home/quantum_main/catkin_ws/src/qr_navigation/scripts/csv_files/dos.csv")
+    file = open("/home/quantum_main/catkin_ws/src/qr_navigation/scripts/csv_files/frida5.csv")
     csvreader = csv.reader(file)
     #header = next(csvreader)
     #print(heade
@@ -86,7 +86,7 @@ while not rospy.is_shutdown():
     print (error)
     if (error > -5 and error < 5):
         if (distance < 6 and distance > 2 ):
-            command.linear.x = 0.12
+            command.linear.x = 0.25
             command.angular.z = 0.0
             print("Avanzando recto velocidad minima, distancia restante: ", distance)
        # elif (distance <= 2):
@@ -94,7 +94,7 @@ while not rospy.is_shutdown():
          #   time.sleep(5)                   
 
         else:
-            command.linear.x = 0.18
+            command.linear.x = 0.25
             command.angular.z = 0.0
             print("Avanzando recto velocidad maxima, distancia restante: ", distance)
     else:
@@ -106,7 +106,7 @@ while not rospy.is_shutdown():
         command.angular.z = max(-sat, min(kp * (error),sat))
 
     print(command)    
-    pub.publish(command)
+    #pub.publish(command)
 
     r.sleep()
 

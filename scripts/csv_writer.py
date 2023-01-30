@@ -24,7 +24,7 @@ rate = rospy.Rate(10)
 if __name__ == "__main__":
 	
 	user_file = input("file: (use quotation marks) ")
-	user_file = "/home/quantum/catkin_ws/src/qr_navigation/scripts/csv_files/" + user_file + ".csv"
+	user_file = "/home/quantum_main/catkin_ws/src/qr_navigation/scripts/csv_files/" + user_file + ".csv"
 
 	if path.exists(user_file) == 1:
 		print ("Archivo existente")

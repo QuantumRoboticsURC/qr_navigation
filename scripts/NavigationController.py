@@ -76,7 +76,7 @@ class NavigationController():
                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)
                 elif self.target_point_type == "gps_and_post":
                     if not self.rotate_while_detecting_ar_ended:
-                        self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_cmd_vel)
+                        self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
                         self.matrix_signal_msg.data = 1
                         self.matrix_signal_publisher.publish(self.matrix_signal_msg)
                     else:                        

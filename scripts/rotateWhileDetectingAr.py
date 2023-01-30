@@ -21,6 +21,7 @@ class RotateWhileDetectingAr():
         self.prev_orientation = None
         self.curr_orientation = None
         self.curr_turns = 0.0
+	self.angle_displaced = 0.0
 
     def imu_pose_callback(self, data):
         self.prev_orientation = self.curr_orientation
@@ -57,7 +58,7 @@ class RotateWhileDetectingAr():
                 self.pub_detected.publish(False)
                 self.pub_rotate_while_detecting_ar_ended.publish(False)
                 self.cmd_vel_msg.angular.z = 0.2
-            self.cmd_vel_pub.publish(twist)
+            self.cmd_vel_pub.publish(self.cmd_vel_msg)
 
 
 if __name__ == "__main__":
