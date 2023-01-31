@@ -1,0 +1,7 @@
+<launch>
+  <node name="rotateWhileDetectingAr" pkg="qr_navigation" type="rotateWhileDetectingAr.py" output="screen"/>
+  <node name="detect_aruco_video2" pkg="zed-implementations" type="detect_aruco_video_2.py" output="screen"/>
+  <node name="center_and_approach" pkg="qr_navigation" type="center_and_approach.py" output="screen"/>  
+  
+  <node name="pose_info" pkg="qr_navigation" type="odom_publisher_puzzlebot_sim.py" output="screen"/>  
+</launch>
