@@ -70,7 +70,6 @@ class CenterAndApproach():
                 self.command_velocity.angular.z = 0.0                                    
                 self.command_velocity_publisher.publish(self.command_velocity)
 
-
 if __name__ == "__main__":
     center_and_approach = CenterAndApproach()
     center_and_approach.main()

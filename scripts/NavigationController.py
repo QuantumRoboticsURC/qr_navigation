@@ -27,6 +27,7 @@ class NavigationController():
         rospy.Subscriber("/follow_gps_cmd_vel", Twist, self.gps_cmd_vel_calback , queue_size=1)        
         rospy.Subscriber("/rotate_while_detecting_ar_cmd_vel", Twist, self.rotate_while_detecting_ar_cmd_vel_callback, queue_size = 1)                
         rospy.Subscriber("/center_and_approach_cmd_vel", Twist, self.center_and_approach_cmd_vel_callback, queue_size=1)
+        self.rotate_while_detecting_ar_start_pub = rospy.Publisher('/rotate_while_detecting_ar_start', Bool, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
 
@@ -37,7 +38,9 @@ class NavigationController():
         self.follow_gps_vel = Twist()
         self.center_and_approach_vel = Twist()
         self.rotate_while_detecting_ar_vel = Twist()            
-        self.stop_vel = Twist() # since Twist message inits with all values in 0.0, no longer config is required        
+        self.stop_vel = Twist() # since Twist message inits with all values in 0.0, no longer config is required
+        self.stop_vel.linear.x = 0.0
+        self.stop_vel.angular.z = 0.0
         self.matrix_signal_msg = Int8()
 
         self.target_point_type = target_point_type    
@@ -79,7 +82,9 @@ class NavigationController():
                         self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
                         self.matrix_signal_msg.data = 1
                         self.matrix_signal_publisher.publish(self.matrix_signal_msg)
-                    else:                        
+                        self.rotate_while_detecting_ar_start_pub.publish(True)
+                    else:
+                        self.rotate_while_detecting_ar_start_pub.publish(False)                        
                         if self.ar_detected:
                             if not self.center_and_approach_ended:
                                 self.command_velocity_publisher.publish(self.center_and_approach_vel)
@@ -92,7 +97,7 @@ class NavigationController():
                         else:
                             self.command_velocity_publisher.publish(self.stop_vel)
                             self.matrix_signal_msg.data = 1
-                            self.matrix_signal_publisher.publish(self.matrix_signal_msg)            
+                            self.matrix_signal_publisher.publish(self.matrix_signal_msg)
 
 if __name__ == "__main__":
     target_point_type = "gps_only"
