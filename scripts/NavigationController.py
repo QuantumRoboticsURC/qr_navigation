@@ -14,7 +14,7 @@ Notes:
 import rospy
 import sys
 from geometry_msgs.msg import Point, Twist
-from std_msgs.msg import Bool, Int8
+from std_msgs.msg import Bool, Int8, String
 
 class NavigationController():
     def __init__(self, target_point_type = "gps_only"):
@@ -27,7 +27,8 @@ class NavigationController():
         rospy.Subscriber("/follow_gps_cmd_vel", Twist, self.gps_cmd_vel_calback , queue_size=1)        
         rospy.Subscriber("/rotate_while_detecting_ar_cmd_vel", Twist, self.rotate_while_detecting_ar_cmd_vel_callback, queue_size = 1)                
         rospy.Subscriber("/center_and_approach_cmd_vel", Twist, self.center_and_approach_cmd_vel_callback, queue_size=1)
-        self.rotate_while_detecting_ar_start_pub = rospy.Publisher('/rotate_while_detecting_ar_start', Bool, queue_size=1)
+        #self.rotate_while_detecting_ar_start_pub = rospy.Publisher('/rotate_while_detecting_ar_start', Bool, queue_size=1)
+        self.control_node_in_turn_pub = rospy.Publisher('/control_node_in_turn', String, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
 
@@ -69,6 +70,7 @@ class NavigationController():
     def main(self):
         while not rospy.is_shutdown():
             if self.gps_arrived == False:
+                self.control_node_in_turn_pub.publish("follow_gps")
                 self.command_velocity_publisher.publish(self.follow_gps_vel)
                 self.matrix_signal_msg.data = 1 # change matrix to red 
                 self.matrix_signal_publisher.publish(self.matrix_signal_msg)
@@ -79,14 +81,14 @@ class NavigationController():
                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)
                 elif self.target_point_type == "gps_and_post":
                     if not self.rotate_while_detecting_ar_ended:
+                        self.control_node_in_turn_pub.publish("rotate_while_detecting_ar")
                         self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
                         self.matrix_signal_msg.data = 1
-                        self.matrix_signal_publisher.publish(self.matrix_signal_msg)
-                        self.rotate_while_detecting_ar_start_pub.publish(True)
-                    else:
-                        self.rotate_while_detecting_ar_start_pub.publish(False)                        
+                        self.matrix_signal_publisher.publish(self.matrix_signal_msg)                        
+                    else:                                                
                         if self.ar_detected:
                             if not self.center_and_approach_ended:
+                                self.control_node_in_turn_pub.publish("center_and_approach")
                                 self.command_velocity_publisher.publish(self.center_and_approach_vel)
                                 self.matrix_signal_msg.data = 1
                                 self.matrix_signal_publisher.publish(self.matrix_signal_msg)        

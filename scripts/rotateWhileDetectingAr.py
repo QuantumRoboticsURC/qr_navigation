@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Point, Quaternion
 from tf.transformations import euler_from_quaternion, quaternion_from_euler #eeyyy
@@ -13,8 +13,9 @@ class RotateWhileDetectingAr():
         rospy.init_node("rotate_while_detecting_ar")
         rospy.Subscriber("/combined_odom", Odometry, self.imu_pose_callback)
         rospy.Subscriber("/closest_aruco_distance", Point, self.ar_detected_callback, queue_size=1)
-        rospy.Subscriber("/rotate_while_detecting_ar_start", Bool, self.start, queue_size=1) 
-        
+        #rospy.Subscriber("/rotate_while_detecting_ar_start", Bool, self.start, queue_size=1) 
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1) 
+
         self.pub_detected = rospy.Publisher("/ar_detected", Bool, queue_size = 1)
         self.pub_rotate_while_detecting_ar_ended = rospy.Publisher("/rotate_while_detecting_ar_ended", Bool, queue_size = 1)
         self.cmd_vel_pub = rospy.Publisher("/rotate_while_detecting_ar_cmd_vel", Twist, queue_size=1)
@@ -30,8 +31,12 @@ class RotateWhileDetectingAr():
         self.current_angle = None        
         self.rate = rospy.Rate(1)
 
-    def start(self, data):
-        self.started = data.data
+    def turn_checker_callback(self, data):
+        control_node_in_turn = data.data
+        if control_node_in_turn == "rotate_while_detecting_ar":
+            self.started = True
+        else:
+            self.started = False                    
 
     def imu_pose_callback(self, data):
         if self.started:
