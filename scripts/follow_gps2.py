@@ -109,4 +109,3 @@ while not rospy.is_shutdown():
     #pub.publish(command)
 
     r.sleep()
-
