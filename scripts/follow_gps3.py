@@ -39,6 +39,7 @@ class FollowGPS():
         self.first_time = True    
 
         self.angular_kp = 0.3
+        self.linear_kp = 0.5
 
     def read_target(self):
         file = open("/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/joses_tests.csv") 
@@ -81,11 +82,19 @@ class FollowGPS():
         return math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
 
     def main(self):
+        self.vel_msg.linear.x = 0.0
+        self.vel_msg.angular.z = 0.0
         if not self.first_time:
             angle_error = self.current_angle - math.atan2(self.target_postition_xy_2d[0], self.target_postition_xy_2d[1])
             distance_error = self.euclidean_distance_2d( self.current_position_xy_2d, self.target_postition_xy_2d )
             if abs(angle_error) < 0.6:
+                print("rotating")                
                 self.vel_msg.angular.z = self.angular_kp*angle_error
+            elif distance_error > 7.0:
+                print("approach")
+                self.vel_msg.linear.x = self.linear_kp*distance_error
+            self.vel_pub.publish(self.vel_msg)
+            
 
 
 
