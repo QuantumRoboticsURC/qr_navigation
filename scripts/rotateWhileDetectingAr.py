@@ -28,8 +28,7 @@ class RotateWhileDetectingAr():
         self.started = False
         self.first_time = True
         self.first_angle = None
-        self.current_angle = None        
-        self.rate = rospy.Rate(1)
+        self.current_angle = None                
 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
@@ -48,20 +47,11 @@ class RotateWhileDetectingAr():
                 self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
                 
     def ar_detected_callback(self, data):        
-        self.new_ar_detected = True    
-
-    """
-    def calculate_num_turns(self):
-        if self.prev_orientation is not None:
-            actual_lecture = self.calculate_angle(self.curr_orientation)
-            prev_angle = self.calculate_angle(self.prev_orientation)
-            self.angle_displaced += abs(actual_lecture - prev_angle)
-            self.curr_turns = self.angle_displaced/(2.0*math.pi)
-    """
+        self.new_ar_detected = True
 
     def calculate_angle(self, orientation_q):
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-        (roll, pitch, yaw) = euler_from_quaternion(orientation_list)            
+        (_, _, yaw) = euler_from_quaternion(orientation_list)            
         if np.sign(yaw) == -1.0:
             yaw = 2*math.pi + yaw            
         return yaw        
@@ -69,8 +59,7 @@ class RotateWhileDetectingAr():
     def main(self):
         # Publish Twist                
         while not rospy.is_shutdown():            
-            if (self.current_angle is not None):                
-                print("{}".format(abs(self.current_angle - self.first_angle)))
+            if (self.current_angle is not None):                                
                 if self.new_ar_detected:                
                     self.pub_detected.publish(True)
                     self.pub_rotate_while_detecting_ar_ended.publish(True)                            
@@ -83,8 +72,7 @@ class RotateWhileDetectingAr():
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)
                     self.cmd_vel_msg.angular.z = 0.2
-                self.cmd_vel_pub.publish(self.cmd_vel_msg)
-            self.rate.sleep()        
+                self.cmd_vel_pub.publish(self.cmd_vel_msg)                  
 
 
 if __name__ == "__main__":
