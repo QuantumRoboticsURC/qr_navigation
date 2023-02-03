@@ -26,8 +26,7 @@ class NavigationController():
         rospy.Subscriber("/ar_detected", Bool, self.ar_detected_callback, queue_size=1)                
         rospy.Subscriber("/follow_gps_cmd_vel", Twist, self.gps_cmd_vel_calback , queue_size=1)        
         rospy.Subscriber("/rotate_while_detecting_ar_cmd_vel", Twist, self.rotate_while_detecting_ar_cmd_vel_callback, queue_size = 1)                
-        rospy.Subscriber("/center_and_approach_cmd_vel", Twist, self.center_and_approach_cmd_vel_callback, queue_size=1)
-        #self.rotate_while_detecting_ar_start_pub = rospy.Publisher('/rotate_while_detecting_ar_start', Bool, queue_size=1)
+        rospy.Subscriber("/center_and_approach_cmd_vel", Twist, self.center_and_approach_cmd_vel_callback, queue_size=1)        
         self.control_node_in_turn_pub = rospy.Publisher('/control_node_in_turn', String, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
@@ -44,13 +43,18 @@ class NavigationController():
         self.stop_vel.angular.z = 0.0
         self.matrix_signal_msg = Int8()
 
-        self.target_point_type = target_point_type    
+        self.target_point_type = target_point_type
+
+    def get_gps_target(self):
+        pass    
 
     def rotate_while_detecting_ar_ended_callback(self, data):
         self.rotate_while_detecting_ar_ended = data.data
 
     def arrived_to_point_signal_callback(self, data):
         self.gps_arrived = data.data
+        if self.gps_arrived:
+            print("gps_arrived!!!")
 
     def ar_detected_callback(self, data):
         self.ar_detected = data.data
