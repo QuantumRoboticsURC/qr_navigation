@@ -39,13 +39,8 @@ class FollowGPS():
         self.first_time = True            
 
         self.angular_kp = 0.3
-        self.linear_kp = 0.5
-
-    """
-    def euler_from_quaternion(quaternion, axes='sxyz'):
-        
-        return euler_from_matrix(quaternion_matrix(quaternion), axes)
-    """
+        #self.linear_kp = 0.5
+        self.linear_kp = 1500
 
     def read_target(self):
         file = open("/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/joses_tests.csv") 
@@ -127,13 +122,14 @@ class FollowGPS():
             self.vel_msg.linear.x = 0.0
             self.vel_msg.angular.z = 0.0
             if not self.first_time:
-                angle_error = self.angle_to_only_possitive(math.atan2(self.target_postition_xy_2d[1], self.target_postition_xy_2d[0])) - self.current_angle
-                distance_error = self.euclidean_distance_2d( self.current_position_xy_2d, self.target_postition_xy_2d )
-                print("distance_error: {}".format(distance_error))                
+                target_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0], self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
+                angle_error = self.angle_to_only_possitive(math.atan2(target_minus_robot_vector[1], target_minus_robot_vector[0])) - self.current_angle
+                distance_error = self.euclidean_distance_2d( (0,0),target_minus_robot_vector )
+                print("angle_error: {}".format(angle_error))                
                 if abs(angle_error) > 0.1:
                     print("rotating")                
                     self.vel_msg.angular.z = self.angular_kp*angle_error
-                elif distance_error > 7.0:
+                elif distance_error > 0.1:
                     #print("approach")
                     self.vel_msg.linear.x = self.linear_kp*distance_error
                 self.vel_pub.publish(self.vel_msg)
