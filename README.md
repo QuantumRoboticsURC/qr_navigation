@@ -4,7 +4,7 @@ For 2023 the logic that will be used for the autonomous navigation mission of th
 
 The process described on this flowchart will be achieved using the following ROS nodes and topics:
 
-![node_diagram](./diagrams/nav_flow_chart.jpeg "node_diagram")
+![node_diagram](./diagrams/navigation_nodes.jpeg "node_diagram")
 
 All nodes are located on the scripts folder and have the following correspondance
 
