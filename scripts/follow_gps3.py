@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """Made by:
-	Leonardo Javier Nava
+    Leonardo Javier Nava
         navaleonardo40@gmail.com
     Jose Angel del Angel Dominguez
         joseangeldelangel10@gmail.com
@@ -16,9 +16,9 @@ import rospy
 import numpy as np
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-#from tf.transformations import euler_from_quaternion
 from sensor_msgs.msg import NavSatFix
 from gps_tranforms import alvinxy as gps_tranforms
+from nav_helpers import nav_functions
 
 
 class FollowGPS():
@@ -70,61 +70,25 @@ class FollowGPS():
                                                                    data.pose.pose.position.y, 
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
-                self.current_angle = self.calculate_angle( data.pose.pose.orientation )
+                self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
                 self.first_time = False
             else:
                 self.current_position_xy_2d = gps_tranforms.ll2xy( data.pose.pose.position.x,
                                                                    data.pose.pose.position.y, 
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
-                self.current_angle = self.calculate_angle( data.pose.pose.orientation )
+                self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
     
-    def calculate_angle(self, orientation_q):
-        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-        (_, _, yaw) = self.euler_from_quaternion(orientation_list)            
-        yaw = self.angle_to_only_possitive(yaw)
-        return yaw        
-    
-    def angle_to_only_possitive(self, angle):
-        theta = angle
-        if np.sign(theta) == -1.0:
-            theta = 2*math.pi + theta
-        return theta
-    
-    def euclidean_distance_2d(self, p1, p2):
-        return math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
-
-    def euler_from_quaternion(self, orientation_list):
-        """
-        Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
-        pitch is rotation around y in radians (counterclockwise)
-        yaw is rotation around z in radians (counterclockwise)
-        """
-        x, y, z, w = orientation_list
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        roll_x = math.atan2(t0, t1)
-     
-        t2 = +2.0 * (w * y - z * x)
-        t2 = +1.0 if t2 > +1.0 else t2
-        t2 = -1.0 if t2 < -1.0 else t2
-        pitch_y = math.asin(t2)
-     
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        yaw_z = math.atan2(t3, t4)
-     
-        return roll_x, pitch_y, yaw_z # in radians
-
     def main(self):
         while not rospy.is_shutdown():            
             self.vel_msg.linear.x = 0.0
             self.vel_msg.angular.z = 0.0
             if not self.first_time:
-                target_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0], self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
-                angle_error = self.angle_to_only_possitive(math.atan2(target_minus_robot_vector[1], target_minus_robot_vector[0])) - self.current_angle
-                distance_error = self.euclidean_distance_2d( (0,0),target_minus_robot_vector )
+                target_vector_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0],
+                                                     self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
+                angle_error = nav_functions.angle_to_only_possitive(math.atan2( target_vector_minus_robot_vector[1],
+                                                                                target_vector_minus_robot_vector[0])) - self.current_angle
+                distance_error = nav_functions.euclidean_distance_single_point_2d( target_vector_minus_robot_vector )
                 print("angle_error: {}".format(angle_error))                
                 if abs(angle_error) > 0.1:
                     print("rotating")                

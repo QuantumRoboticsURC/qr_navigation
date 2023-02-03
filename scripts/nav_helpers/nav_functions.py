@@ -1,7 +1,12 @@
-def calculate_angle(orientation_q):
+#!/usr/bin/env python3
+
+import math
+import numpy as np
+
+def calculate_yaw_angle(orientation_q):
     orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-    (_, _, yaw) = self.euler_from_quaternion(orientation_list)            
-    yaw = self.angle_to_only_possitive(yaw)
+    (_, _, yaw) = euler_from_quaternion(orientation_list)            
+    yaw = angle_to_only_possitive(yaw)
     return yaw  
 
 def angle_to_only_possitive(angle):
@@ -10,8 +15,11 @@ def angle_to_only_possitive(angle):
         theta = 2*math.pi + theta
     return theta
 
-def euclidean_distance_2d(p1, p2):
+def euclidean_distance_point_to_point_2d(p1, p2):
     return math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
+
+def euclidean_distance_single_point_2d(p1):
+    return math.sqrt( (p1[0])**2 + (p1[1])**2 )
 
 def euler_from_quaternion(orientation_list):
     """
@@ -35,3 +43,12 @@ def euler_from_quaternion(orientation_list):
     yaw_z = math.atan2(t3, t4)
     
     return roll_x, pitch_y, yaw_z # in radians
+
+def saturate_signal(self, signal, saturation_value):
+        if signal > abs(saturation_value):
+            result = abs(saturation_value)
+        elif signal < -abs(saturation_value):
+            result = -abs(saturation_value)
+        else:
+            result = signal
+        return result
