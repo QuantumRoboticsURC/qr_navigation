@@ -14,6 +14,7 @@ import csv
 import math
 import rospy
 import numpy as np
+import pandas as pd
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import NavSatFix
@@ -31,12 +32,13 @@ class FollowGPS():
         self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
         self.vel_msg = Twist()
 
+        self.gps_target_file = "/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/goal_cords.csv"
         self.initial_position_ll_2d = (None, None)
         # we dont save initial position in x y meters since inital position will always be 0
         self.current_position_xy_2d = (None, None)
         self.target_postition_xy_2d = (None, None)
         self.current_angle = None
-        self.started = False # TODO change to false when turn chechker is added
+        self.started = False
         self.first_time = True
         self.distance_error_treshold = 0.25
         self.angular_error_treshold = 0.1            
@@ -45,12 +47,10 @@ class FollowGPS():
         #self.linear_kp = 0.5
         self.linear_kp = 1500        
 
-    def read_target(self):
-        file = open("/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/joses_tests.csv") 
-        csvreader = csv.reader(file)
-        first_coord = list(csvreader)[0]
-        target_lat = float(first_coord[1])
-        target_long = float(first_coord[2])        
+    def read_target(self):        
+        df = pd.read_csv(self.gps_target_file, index_col=False)        
+        target_lat = float( df["latitude"][0] )
+        target_long = float( df["longitude"][0] )        
         self.target_postition_xy_2d = gps_tranforms.ll2xy( target_lat,
                                                            target_long,
                                                            self.initial_position_ll_2d[0],
@@ -62,18 +62,24 @@ class FollowGPS():
         if control_node_in_turn == "follow_gps":
             self.started = True
         else:
-            self.started = False        
+            self.started = False
+            self.first_time = True        
 
     def imu_and_gps_data_callback(self, data):
         if self.started:
             if self.first_time:
-                self.initial_position_ll_2d = (data.pose.pose.position.x, data.pose.pose.position.y)
-                self.read_target()
+                self.initial_position_ll_2d = (data.pose.pose.position.x, data.pose.pose.position.y)                
                 self.current_position_xy_2d = gps_tranforms.ll2xy( data.pose.pose.position.x,
                                                                    data.pose.pose.position.y, 
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
+                while True:
+                    try:
+                        self.read_target()
+                        break
+                    except:
+                        pass
                 self.first_time = False
             else:
                 self.current_position_xy_2d = gps_tranforms.ll2xy( data.pose.pose.position.x,

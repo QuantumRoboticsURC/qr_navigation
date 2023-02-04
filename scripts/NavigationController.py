@@ -13,11 +13,13 @@ Notes:
 
 import rospy
 import sys
+import pandas as pd
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
+from gps_tranforms import alvinxy as gps_transforms
 
 class NavigationController():
-    def __init__(self, target_point_type = "gps_only"):
+    def __init__(self):
         # ___ ros atributes initialization ___
         rospy.init_node("navigation_controller")
         rospy.Subscriber("/gps_arrived", Bool, self.arrived_to_point_signal_callback, queue_size=1)
@@ -31,6 +33,7 @@ class NavigationController():
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
 
+        self.gps_target_file = "/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/goal_cords.csv"
         self.gps_arrived = False
         self.ar_detected = False
         self.rotate_while_detecting_ar_ended = False        
@@ -38,18 +41,101 @@ class NavigationController():
         self.follow_gps_vel = Twist()
         self.center_and_approach_vel = Twist()
         self.rotate_while_detecting_ar_vel = Twist()            
-        self.stop_vel = Twist() # since Twist message inits with all values in 0.0, no longer config is required
+        self.stop_vel = Twist() 
         self.stop_vel.linear.x = 0.0
         self.stop_vel.angular.z = 0.0
         self.matrix_signal_msg = Int8()
+        self.target_latitude = None
+        self.target_longitude = None
+        self.snail_trayectory_gps_points = []
+        self.snail_trayectory_index = 0
+        
+        #TODO - enable the next user input functions to work with arrow keys and control copy 
+        self.get_gps_target()
+        self.get_target_point_type()
+        self.set_gps_target(self.target_latitude, self.target_longitude)        
+        self.generate_snail_trayectory_points()
+        print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
+        print("target type is {t}".format(t = self.target_point_type))
 
-        self.target_point_type = target_point_type
+    def xy2ll_simplyfied_for_snail_generation(self, cord):
+        return gps_transforms.xy2ll(cord[0], cord[1], self.target_latitude, self.target_longitude)
+    
+    def generate_snail_trayectory_points(self, num_turns = 2):        
+        if self.target_point_type == "gps_and_post" or self.target_point_type == "gps_and_post":
+            origin = (0,0)
+            cords_list = [origin]
+            current_cord = origin
+            current_turn = 1
+            disatnce_between_each_sanil_point = 5
+            while current_cord != (origin[0] + num_turns*disatnce_between_each_sanil_point, origin[1] -num_turns*disatnce_between_each_sanil_point):
+                
+                if current_cord == (origin[0] + current_turn*disatnce_between_each_sanil_point, origin[1] -current_turn*disatnce_between_each_sanil_point):
+                    current_turn += 1
+                
+                if  (current_cord[1] - disatnce_between_each_sanil_point >= origin[1] -current_turn*disatnce_between_each_sanil_point and
+                (current_cord[0], current_cord[1] - disatnce_between_each_sanil_point) not in cords_list ):
+                    current_cord = (current_cord[0], current_cord[1] - disatnce_between_each_sanil_point)
+                    cords_list.append(current_cord)
+                elif (current_cord[0] - disatnce_between_each_sanil_point >= origin[0] -current_turn*disatnce_between_each_sanil_point and
+                (current_cord[0] - disatnce_between_each_sanil_point, current_cord[1]) not in cords_list ):
+                    current_cord = (current_cord[0] - disatnce_between_each_sanil_point, current_cord[1])
+                    cords_list.append(current_cord)
+                elif (current_cord[1] + disatnce_between_each_sanil_point <= origin[1] + current_turn*disatnce_between_each_sanil_point and
+                (current_cord[0], current_cord[1] + disatnce_between_each_sanil_point) not in cords_list ):
+                    current_cord = (current_cord[0], current_cord[1] + disatnce_between_each_sanil_point)
+                    cords_list.append(current_cord)
+                elif (current_cord[0] + disatnce_between_each_sanil_point <= origin[0] + disatnce_between_each_sanil_point*current_turn and
+                (current_cord[0] + disatnce_between_each_sanil_point, current_cord[1]) not in cords_list ):
+                    current_cord = (current_cord[0] + disatnce_between_each_sanil_point, current_cord[1])
+                    cords_list.append(current_cord)
+            
+            cords_list.pop(0)
+            self.snail_trayectory_gps_points = list(map(self.xy2ll_simplyfied_for_snail_generation, cords_list))
+
+    def set_gps_target(self, lat, lon):
+        df  = pd.DataFrame.from_dict({"latitude":[lat], "longitude":[lon]})
+        df.to_csv(self.gps_target_file, index=False)        
+
+    def get_target_point_type(self):
+        valid_target_point_types = ["gps_only", "gps_and_post", "gps_and_gate"]
+        while True:
+            try:
+                print("which is the type of target we are going,  plase select one of the following or its respective index \n {targs}".format(targs = valid_target_point_types))
+                user_input = input("type is: ")
+                print("\n")
+                if user_input in valid_target_point_types or int(user_input) < len(valid_target_point_types):
+                    if user_input in valid_target_point_types:
+                        self.target_point_type = user_input
+                    else:
+                        self.target_point_type = valid_target_point_types[int(user_input)]
+                    break
+                else:
+                    raise Exception("invalid input")
+            except:
+                print("invalid input, plese select one of the target point types in the list")
+                print("\n")
 
     def get_gps_target(self):
-        pass    
+        while True:
+            try:
+                user_input = eval(
+                    input("What are the lat and long cords of next point, please wirte '(lat, long)': ")
+                )
+                print("\n")
+                if len(user_input) != 2 or type(user_input) != tuple:
+                    raise Exception("Invalid input")
+                else:
+                    self.target_latitude, self.target_longitude = user_input
+                    break                
+            except:
+                print("invalid input, please give me a tuple with latitude and longitude units")
+                print("\n")
 
     def rotate_while_detecting_ar_ended_callback(self, data):
         self.rotate_while_detecting_ar_ended = data.data
+        if self.rotate_while_detecting_ar_ended:
+            print("rotate_while_detectin_ar_ended!!!")
 
     def arrived_to_point_signal_callback(self, data):
         self.gps_arrived = data.data
@@ -58,6 +144,8 @@ class NavigationController():
 
     def ar_detected_callback(self, data):
         self.ar_detected = data.data
+        if self.ar_detected:
+            print("aruco_detected!!!")
         
     def center_and_approach_ended_callback(self, data):
         self.center_and_approach_ended = data.data
@@ -83,7 +171,8 @@ class NavigationController():
                     self.command_velocity_publisher.publish(self.stop_vel)
                     self.matrix_signal_msg.data = 0 # change matrix to green
                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)
-                elif self.target_point_type == "gps_and_post":
+                    # THIS IS THE END OF ROUTINE FOR GPS_ONLY
+                elif self.target_point_type == "gps_and_post" or self.target_point_type == "gps_and_gate":                                        
                     if not self.rotate_while_detecting_ar_ended:
                         self.control_node_in_turn_pub.publish("rotate_while_detecting_ar")
                         self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
@@ -96,19 +185,16 @@ class NavigationController():
                                 self.command_velocity_publisher.publish(self.center_and_approach_vel)
                                 self.matrix_signal_msg.data = 1
                                 self.matrix_signal_publisher.publish(self.matrix_signal_msg)        
-                            else:
+                            else:                                
                                 self.command_velocity_publisher.publish(self.stop_vel)
                                 self.matrix_signal_msg.data = 0
                                 self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
-                        else:
-                            self.command_velocity_publisher.publish(self.stop_vel)
-                            self.matrix_signal_msg.data = 1
-                            self.matrix_signal_publisher.publish(self.matrix_signal_msg)
+                                # THIS IS THE END OF ROUTINE FOR GPS_AND_POST
+                        else:                                                        
+                            self.set_gps_target(self.snail_trayectory_gps_points[self.snail_trayectory_index][0],
+                                                    self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                            
+                            self.gps_arrived = False
 
 if __name__ == "__main__":
-    target_point_type = "gps_only"
-    if len(sys.argv) > 1:
-        target_point_type = sys.argv[1]
-        print("target_point_type is {t}".format(t = target_point_type))
-    navigation_controller = NavigationController(target_point_type)
+    navigation_controller = NavigationController()
     navigation_controller.main()    

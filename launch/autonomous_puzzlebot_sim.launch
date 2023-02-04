@@ -4,6 +4,7 @@
   <node name="detect_aruco_video2" pkg="zed-implementations" type="detect_aruco_video_2.py" output="screen"/>
   <node name="center_and_approach" pkg="qr_navigation" type="center_and_approach.py" output="screen"/>  
   
-  <node name="goal_marker_spawner" pkg="qr_navigation" type="spawn_goal_position_marker" output="screen"/>  
+  <!--<node name="goal_marker_spawner" pkg="qr_navigation" type="spawn_goal_position_marker" output="screen"/>  -->
+  <node name="goal_marker_spawner" pkg="qr_navigation" type="spawn_goal_position_marker.py" output="screen"/>  
   <node name="pose_info" pkg="qr_navigation" type="odom_publisher_puzzlebot_sim.py" output="screen"/>  
 </launch>
