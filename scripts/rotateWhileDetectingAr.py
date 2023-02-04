@@ -23,29 +23,34 @@ class RotateWhileDetectingAr():
         self.cmd_vel_msg = Twist()
         self.num_turns = 1.0
         self.new_ar_detected = False                
-        self.curr_turns = 0.0        
-        self.error_treshold = 0.52 
+        self.curr_turns = 0.0     
+        self.angle_displaced = 0.0           
         self.started = False
-        self.first_time = True
-        self.first_angle = None
+        self.first_time = True        
         self.current_angle = None
-        self.previous_angle = None
-        self.angle_displaced = None                        
+        self.previous_angle = None                                
 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
         if control_node_in_turn == "rotate_while_detecting_ar":
             self.started = True
         else:
-            self.started = False        
-            self.first_angle = True            
+            self.reset_vaules()        
+
+    def reset_vaules(self):
+        self.cmd_vel_msg = Twist()
+        self.new_ar_detected = False                
+        self.curr_turns = 0.0     
+        self.angle_displaced = 0.0           
+        self.started = False
+        self.first_time = True        
+        self.current_angle = None
+        self.previous_angle = None                    
 
     def imu_pose_callback(self, data):
         if self.started:
-            if self.first_time:
-                self.first_angle = self.calculate_angle(data.pose.pose.orientation)
-                self.current_angle = self.calculate_angle(data.pose.pose.orientation)
-                self.angle_displaced = 0.0
+            if self.first_time:                
+                self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
                 self.first_time = False
             else:
                 self.previous_angle = self.current_angle                 
@@ -77,17 +82,18 @@ class RotateWhileDetectingAr():
                 #print( "current turns is: {}".format(self.curr_turns))                 
                 if self.new_ar_detected:                
                     self.pub_detected.publish(True)
-                    self.pub_rotate_while_detecting_ar_ended.publish(True)                            
+                    self.pub_rotate_while_detecting_ar_ended.publish(True)                    
                     self.cmd_vel_msg.angular.z = 0.0
                 elif self.curr_turns >= self.num_turns:
                     self.pub_detected.publish(False)
-                    self.pub_rotate_while_detecting_ar_ended.publish(True)                            
+                    self.pub_rotate_while_detecting_ar_ended.publish(True)                                                                     
                     self.cmd_vel_msg.angular.z = 0.0
                 else:                
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)
-                    self.cmd_vel_msg.angular.z = 0.2
-                self.cmd_vel_pub.publish(self.cmd_vel_msg)                  
+                    #self.cmd_vel_msg.angular.z = 0.2
+                    self.cmd_vel_msg.angular.z = 0.5
+                self.cmd_vel_pub.publish(self.cmd_vel_msg)            
 
 
 if __name__ == "__main__":

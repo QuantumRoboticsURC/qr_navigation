@@ -45,16 +45,29 @@ class FollowGPS():
 
         self.angular_kp = 0.3
         #self.linear_kp = 0.5
-        self.linear_kp = 1500        
+        self.linear_kp = 1500     
+
+    def reset_values(self):        
+        self.vel_msg = Twist()
+        self.initial_position_ll_2d = (None, None)        
+        self.current_position_xy_2d = (None, None)
+        self.target_postition_xy_2d = (None, None)
+        self.current_angle = None
+        self.started = False
+        self.first_time = True
 
     def read_target(self):        
         df = pd.read_csv(self.gps_target_file, index_col=False)        
         target_lat = float( df["latitude"][0] )
-        target_long = float( df["longitude"][0] )        
-        self.target_postition_xy_2d = gps_tranforms.ll2xy( target_lat,
-                                                           target_long,
-                                                           self.initial_position_ll_2d[0],
-                                                           self.initial_position_ll_2d[1])
+        target_long = float( df["longitude"][0] )
+        new_target_position_xy_2d = gps_tranforms.ll2xy( target_lat,
+                                                target_long,
+                                                self.initial_position_ll_2d[0],
+                                                self.initial_position_ll_2d[1])
+        if new_target_position_xy_2d != self.target_postition_xy_2d:
+            self.target_postition_xy_2d = new_target_position_xy_2d
+        else:
+            raise Exception("target hasn't been updated")        
         print("target is: {}".format(self.target_postition_xy_2d))
 
     def turn_checker_callback(self, data):
@@ -62,8 +75,7 @@ class FollowGPS():
         if control_node_in_turn == "follow_gps":
             self.started = True
         else:
-            self.started = False
-            self.first_time = True        
+            self.reset_values()       
 
     def imu_and_gps_data_callback(self, data):
         if self.started:
@@ -100,16 +112,12 @@ class FollowGPS():
                 distance_error = nav_functions.euclidean_distance_single_point_2d( target_vector_minus_robot_vector )                          
                 if abs(angle_error) > self.angular_error_treshold:                                    
                     self.vel_msg.angular.z = self.angular_kp*angle_error
-                elif distance_error > self.distance_error_treshold:
-                    #print("approach")
+                elif distance_error > self.distance_error_treshold:                    
                     self.vel_msg.linear.x = self.linear_kp*distance_error
                     self.gps_arrived_pub.publish(False)
-                elif distance_error <= self.distance_error_treshold:
-                    self.gps_arrived_pub.publish(True)
-                self.vel_pub.publish(self.vel_msg)
-            
-
-
+                elif distance_error <= self.distance_error_treshold:                    
+                    self.gps_arrived_pub.publish(True)                    
+                self.vel_pub.publish(self.vel_msg)            
 
 if __name__ == "__main__":
     follow_gps = FollowGPS()

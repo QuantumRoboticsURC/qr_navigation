@@ -48,13 +48,14 @@ class NavigationController():
         self.target_latitude = None
         self.target_longitude = None
         self.snail_trayectory_gps_points = []
-        self.snail_trayectory_index = 0
+        self.snail_trayectory_index = -1
         
         #TODO - enable the next user input functions to work with arrow keys and control copy 
         self.get_gps_target()
         self.get_target_point_type()
         self.set_gps_target(self.target_latitude, self.target_longitude)        
         self.generate_snail_trayectory_points()
+        print(self.snail_trayectory_gps_points)
         print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
         print("target type is {t}".format(t = self.target_point_type))
 
@@ -190,10 +191,14 @@ class NavigationController():
                                 self.matrix_signal_msg.data = 0
                                 self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
                                 # THIS IS THE END OF ROUTINE FOR GPS_AND_POST
-                        else:                                                        
+                        else:
+                            self.snail_trayectory_index += 1
+                            print("snail trayectory index is {}".format(self.snail_trayectory_index))
                             self.set_gps_target(self.snail_trayectory_gps_points[self.snail_trayectory_index][0],
-                                                    self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                            
+                                                    self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                                                        
                             self.gps_arrived = False
+                            self.rotate_while_detecting_ar_ended = False
+                            self.control_node_in_turn_pub.publish("follow_gps")
 
 if __name__ == "__main__":
     navigation_controller = NavigationController()
