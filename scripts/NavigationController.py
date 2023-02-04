@@ -14,6 +14,7 @@ Notes:
 import rospy
 import sys
 import pandas as pd
+import sched, time
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
 from gps_tranforms import alvinxy as gps_transforms
@@ -38,6 +39,10 @@ class NavigationController():
         self.ar_detected = False
         self.rotate_while_detecting_ar_ended = False        
         self.center_and_approach_ended = False
+
+        self.block_new_follow_gps_data = False
+        self.block_new_rotate_while_detecting_ar_data = False
+
         self.follow_gps_vel = Twist()
         self.center_and_approach_vel = Twist()
         self.rotate_while_detecting_ar_vel = Twist()            
@@ -134,19 +139,23 @@ class NavigationController():
                 print("\n")
 
     def rotate_while_detecting_ar_ended_callback(self, data):
-        self.rotate_while_detecting_ar_ended = data.data
-        if self.rotate_while_detecting_ar_ended:
-            print("rotate_while_detectin_ar_ended!!!")
+        if not self.block_new_rotate_while_detecting_ar_data:
+            self.rotate_while_detecting_ar_ended = data.data
+            if self.rotate_while_detecting_ar_ended:
+                print("rotate_while_detectin_ar_ended!!!")
+                self.block_new_rotate_while_detecting_ar_data = True 
 
     def arrived_to_point_signal_callback(self, data):
-        self.gps_arrived = data.data
-        if self.gps_arrived:
-            print("gps_arrived!!!")
+        if not self.block_new_follow_gps_data:
+            self.gps_arrived = data.data
+            if self.gps_arrived:
+                print("gps_arrived!!!")
+                self.block_new_follow_gps_data = True
 
-    def ar_detected_callback(self, data):
+    def ar_detected_callback(self, data):        
         self.ar_detected = data.data
         if self.ar_detected:
-            print("aruco_detected!!!")
+            print("aruco_detected!!!")                
         
     def center_and_approach_ended_callback(self, data):
         self.center_and_approach_ended = data.data
@@ -160,13 +169,17 @@ class NavigationController():
     def rotate_while_detecting_ar_cmd_vel_callback(self, data):
         self.rotate_while_detecting_ar_vel = data
 
+    def unblock_new_follow_gps_and_rotate_while_detecting_ar_data(self):
+        self.block_new_follow_gps_data = False
+        self.block_new_rotate_while_detecting_ar_data = False 
+
     def main(self):
         while not rospy.is_shutdown():
             if self.gps_arrived == False:
                 self.control_node_in_turn_pub.publish("follow_gps")
                 self.command_velocity_publisher.publish(self.follow_gps_vel)
                 self.matrix_signal_msg.data = 1 # change matrix to red 
-                self.matrix_signal_publisher.publish(self.matrix_signal_msg)
+                self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
             else:
                 if self.target_point_type == "gps_only":
                     self.command_velocity_publisher.publish(self.stop_vel)
@@ -198,6 +211,9 @@ class NavigationController():
                                                     self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                                                        
                             self.gps_arrived = False
                             self.rotate_while_detecting_ar_ended = False
+                            task = sched.scheduler(rospy.get_time, rospy.sleep)
+                            task.enter(1.0, 1, self.unblock_new_follow_gps_and_rotate_while_detecting_ar_data)
+                            task.run()                            
                             self.control_node_in_turn_pub.publish("follow_gps")
 
 if __name__ == "__main__":

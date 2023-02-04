@@ -84,10 +84,12 @@ class RotateWhileDetectingAr():
                     self.pub_detected.publish(True)
                     self.pub_rotate_while_detecting_ar_ended.publish(True)                    
                     self.cmd_vel_msg.angular.z = 0.0
+                    self.started = False
                 elif self.curr_turns >= self.num_turns:
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(True)                                                                     
                     self.cmd_vel_msg.angular.z = 0.0
+                    self.started = False
                 else:                
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)

@@ -104,7 +104,7 @@ class FollowGPS():
         while not rospy.is_shutdown():            
             self.vel_msg.linear.x = 0.0
             self.vel_msg.angular.z = 0.0
-            if not self.first_time:
+            if self.started and not self.first_time:
                 target_vector_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0],
                                                      self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
                 angle_error = nav_functions.angle_to_only_possitive(math.atan2( target_vector_minus_robot_vector[1],
@@ -116,7 +116,8 @@ class FollowGPS():
                     self.vel_msg.linear.x = self.linear_kp*distance_error
                     self.gps_arrived_pub.publish(False)
                 elif distance_error <= self.distance_error_treshold:                    
-                    self.gps_arrived_pub.publish(True)                    
+                    self.gps_arrived_pub.publish(True)
+                    self.started = False                    
                 self.vel_pub.publish(self.vel_msg)            
 
 if __name__ == "__main__":
