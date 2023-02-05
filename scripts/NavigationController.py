@@ -39,10 +39,8 @@ class NavigationController():
         self.ar_detected = False
         self.rotate_while_detecting_ar_ended = False        
         self.center_and_approach_ended = False
-
         self.block_new_follow_gps_data = False
         self.block_new_rotate_while_detecting_ar_data = False
-
         self.follow_gps_vel = Twist()
         self.center_and_approach_vel = Twist()
         self.rotate_while_detecting_ar_vel = Twist()            
@@ -54,15 +52,47 @@ class NavigationController():
         self.target_longitude = None
         self.snail_trayectory_gps_points = []
         self.snail_trayectory_index = -1
+        self.autonomous_navigation_ended = False
         
         #TODO - enable the next user input functions to work with arrow keys and control copy 
         self.get_gps_target()
         self.get_target_point_type()
         self.set_gps_target(self.target_latitude, self.target_longitude)        
         self.generate_snail_trayectory_points()
-        print(self.snail_trayectory_gps_points)
+        
         print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
         print("target type is {t}".format(t = self.target_point_type))
+
+    def rotate_while_detecting_ar_ended_callback(self, data):
+        if not self.block_new_rotate_while_detecting_ar_data:
+            self.rotate_while_detecting_ar_ended = data.data
+            if self.rotate_while_detecting_ar_ended:
+                print("rotate_while_detectin_ar_ended!!!")
+                self.block_new_rotate_while_detecting_ar_data = True 
+
+    def arrived_to_point_signal_callback(self, data):
+        if not self.block_new_follow_gps_data:
+            self.gps_arrived = data.data
+            if self.gps_arrived:
+                print("gps_arrived!!!")
+                self.block_new_follow_gps_data = True
+
+    def ar_detected_callback(self, data):        
+        self.ar_detected = data.data
+        if self.ar_detected:
+            print("aruco_detected!!!")                
+        
+    def center_and_approach_ended_callback(self, data):
+        self.center_and_approach_ended = data.data
+
+    def center_and_approach_cmd_vel_callback(self, data):
+        self.center_and_approach_vel = data
+
+    def gps_cmd_vel_calback(self, data):
+        self.follow_gps_vel = data
+    
+    def rotate_while_detecting_ar_cmd_vel_callback(self, data):
+        self.rotate_while_detecting_ar_vel = data
 
     def xy2ll_simplyfied_for_snail_generation(self, cord):
         return gps_transforms.xy2ll(cord[0], cord[1], self.target_latitude, self.target_longitude)
@@ -138,83 +168,58 @@ class NavigationController():
                 print("invalid input, please give me a tuple with latitude and longitude units")
                 print("\n")
 
-    def rotate_while_detecting_ar_ended_callback(self, data):
-        if not self.block_new_rotate_while_detecting_ar_data:
-            self.rotate_while_detecting_ar_ended = data.data
-            if self.rotate_while_detecting_ar_ended:
-                print("rotate_while_detectin_ar_ended!!!")
-                self.block_new_rotate_while_detecting_ar_data = True 
-
-    def arrived_to_point_signal_callback(self, data):
-        if not self.block_new_follow_gps_data:
-            self.gps_arrived = data.data
-            if self.gps_arrived:
-                print("gps_arrived!!!")
-                self.block_new_follow_gps_data = True
-
-    def ar_detected_callback(self, data):        
-        self.ar_detected = data.data
-        if self.ar_detected:
-            print("aruco_detected!!!")                
-        
-    def center_and_approach_ended_callback(self, data):
-        self.center_and_approach_ended = data.data
-
-    def center_and_approach_cmd_vel_callback(self, data):
-        self.center_and_approach_vel = data
-
-    def gps_cmd_vel_calback(self, data):
-        self.follow_gps_vel = data
-    
-    def rotate_while_detecting_ar_cmd_vel_callback(self, data):
-        self.rotate_while_detecting_ar_vel = data
-
     def unblock_new_follow_gps_and_rotate_while_detecting_ar_data(self):
         self.block_new_follow_gps_data = False
         self.block_new_rotate_while_detecting_ar_data = False 
 
     def main(self):
         while not rospy.is_shutdown():
-            if self.gps_arrived == False:
-                self.control_node_in_turn_pub.publish("follow_gps")
-                self.command_velocity_publisher.publish(self.follow_gps_vel)
-                self.matrix_signal_msg.data = 1 # change matrix to red 
-                self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
+            if self.autonomous_navigation_ended:
+                print("SUCCESS: Navigation completed")
+                break
             else:
-                if self.target_point_type == "gps_only":
-                    self.command_velocity_publisher.publish(self.stop_vel)
-                    self.matrix_signal_msg.data = 0 # change matrix to green
-                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)
-                    # THIS IS THE END OF ROUTINE FOR GPS_ONLY
-                elif self.target_point_type == "gps_and_post" or self.target_point_type == "gps_and_gate":                                        
-                    if not self.rotate_while_detecting_ar_ended:
-                        self.control_node_in_turn_pub.publish("rotate_while_detecting_ar")
-                        self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
-                        self.matrix_signal_msg.data = 1
-                        self.matrix_signal_publisher.publish(self.matrix_signal_msg)                        
-                    else:                                                
-                        if self.ar_detected:
-                            if not self.center_and_approach_ended:
-                                self.control_node_in_turn_pub.publish("center_and_approach")
-                                self.command_velocity_publisher.publish(self.center_and_approach_vel)
-                                self.matrix_signal_msg.data = 1
-                                self.matrix_signal_publisher.publish(self.matrix_signal_msg)        
-                            else:                                
-                                self.command_velocity_publisher.publish(self.stop_vel)
-                                self.matrix_signal_msg.data = 0
-                                self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
-                                # THIS IS THE END OF ROUTINE FOR GPS_AND_POST
-                        else:
-                            self.snail_trayectory_index += 1
-                            print("snail trayectory index is {}".format(self.snail_trayectory_index))
-                            self.set_gps_target(self.snail_trayectory_gps_points[self.snail_trayectory_index][0],
-                                                    self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                                                        
-                            self.gps_arrived = False
-                            self.rotate_while_detecting_ar_ended = False
-                            task = sched.scheduler(rospy.get_time, rospy.sleep)
-                            task.enter(1.0, 1, self.unblock_new_follow_gps_and_rotate_while_detecting_ar_data)
-                            task.run()                            
-                            self.control_node_in_turn_pub.publish("follow_gps")
+                if self.gps_arrived == False:
+                    self.control_node_in_turn_pub.publish("follow_gps")
+                    self.command_velocity_publisher.publish(self.follow_gps_vel)
+                    self.matrix_signal_msg.data = 1 # change matrix to red 
+                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
+                else:
+                    if self.target_point_type == "gps_only":
+                        self.command_velocity_publisher.publish(self.stop_vel)
+                        self.matrix_signal_msg.data = 0 # change matrix to green
+                        self.matrix_signal_publisher.publish(self.matrix_signal_msg)
+                        self.autonomous_navigation_ended = True
+                        # THIS IS THE END OF ROUTINE FOR GPS_ONLY
+                    elif self.target_point_type == "gps_and_post" or self.target_point_type == "gps_and_gate":                                        
+                        if not self.rotate_while_detecting_ar_ended:
+                            self.control_node_in_turn_pub.publish("rotate_while_detecting_ar")
+                            self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
+                            self.matrix_signal_msg.data = 1
+                            self.matrix_signal_publisher.publish(self.matrix_signal_msg)                        
+                        else:                                                
+                            if self.ar_detected:
+                                if not self.center_and_approach_ended:
+                                    self.control_node_in_turn_pub.publish("center_and_approach")
+                                    self.command_velocity_publisher.publish(self.center_and_approach_vel)
+                                    self.matrix_signal_msg.data = 1
+                                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)        
+                                else:                                
+                                    self.command_velocity_publisher.publish(self.stop_vel)
+                                    self.matrix_signal_msg.data = 0
+                                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
+                                    self.autonomous_navigation_ended = True
+                                    # THIS IS THE END OF ROUTINE FOR GPS_AND_POST                                    
+                            else:
+                                self.snail_trayectory_index += 1
+                                print("snail trayectory index is {}".format(self.snail_trayectory_index))
+                                self.set_gps_target(self.snail_trayectory_gps_points[self.snail_trayectory_index][0],
+                                                        self.snail_trayectory_gps_points[self.snail_trayectory_index][1])                                                        
+                                self.gps_arrived = False
+                                self.rotate_while_detecting_ar_ended = False
+                                task = sched.scheduler(rospy.get_time, rospy.sleep)
+                                task.enter(1.0, 1, self.unblock_new_follow_gps_and_rotate_while_detecting_ar_data)
+                                task.run()                            
+                                self.control_node_in_turn_pub.publish("follow_gps")
 
 if __name__ == "__main__":
     navigation_controller = NavigationController()
