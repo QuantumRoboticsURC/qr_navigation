@@ -55,6 +55,7 @@ class RotateWhileDetectingAr():
             else:
                 self.previous_angle = self.current_angle                 
                 self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
+                self.calculate_num_turns()
                 
     def ar_detected_callback(self, data):        
         self.new_ar_detected = True
@@ -78,7 +79,7 @@ class RotateWhileDetectingAr():
         # Publish Twist                
         while not rospy.is_shutdown():            
             if self.started and (self.previous_angle is not None):                               
-                self.calculate_num_turns()
+                #self.calculate_num_turns()
                 #print( "current turns is: {}".format(self.curr_turns))                 
                 if self.new_ar_detected:                
                     self.pub_detected.publish(True)
