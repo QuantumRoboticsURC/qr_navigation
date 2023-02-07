@@ -41,6 +41,7 @@ class NavigationController():
         self.center_and_approach_ended = False
         self.block_new_follow_gps_data = False
         self.block_new_rotate_while_detecting_ar_data = False
+        self.block_new_ar_detected_data = False
         self.follow_gps_vel = Twist()
         self.center_and_approach_vel = Twist()
         self.rotate_while_detecting_ar_vel = Twist()            
@@ -77,10 +78,12 @@ class NavigationController():
                 print("gps_arrived!!!")
                 self.block_new_follow_gps_data = True
 
-    def ar_detected_callback(self, data):        
-        self.ar_detected = data.data
-        if self.ar_detected:
-            print("aruco_detected!!!")                
+    def ar_detected_callback(self, data):
+        if not self.block_new_ar_detected_data:        
+            self.ar_detected = data.data
+            if self.ar_detected:
+                print("aruco_detected!!!")                           
+                self.block_new_ar_detected_data = True     
         
     def center_and_approach_ended_callback(self, data):
         self.center_and_approach_ended = data.data

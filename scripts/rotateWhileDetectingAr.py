@@ -54,7 +54,8 @@ class RotateWhileDetectingAr():
             else:
                 self.previous_angle = self.current_angle                 
                 self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
-                self.calculate_num_turns()
+                if self.previous_angle is not None:
+                    self.calculate_num_turns()
                 
     def ar_detected_callback(self, data):        
         self.new_ar_detected = True
