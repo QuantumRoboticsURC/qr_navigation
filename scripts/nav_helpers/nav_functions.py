@@ -44,7 +44,7 @@ def euler_from_quaternion(orientation_list):
     
     return roll_x, pitch_y, yaw_z # in radians
 
-def saturate_signal(self, signal, saturation_value):
+def saturate_signal(signal, saturation_value):
         if signal > abs(saturation_value):
             result = abs(saturation_value)
         elif signal < -abs(saturation_value):

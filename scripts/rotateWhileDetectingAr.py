@@ -12,8 +12,7 @@ class RotateWhileDetectingAr():
     def __init__(self):
         rospy.init_node("rotate_while_detecting_ar")
         rospy.Subscriber("/combined_odom", Odometry, self.imu_pose_callback)
-        rospy.Subscriber("/closest_aruco_distance", Point, self.ar_detected_callback, queue_size=1)
-        #rospy.Subscriber("/rotate_while_detecting_ar_start", Bool, self.start, queue_size=1) 
+        rospy.Subscriber("/closest_aruco_distance", Point, self.ar_detected_callback, queue_size=1)        
         rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1) 
 
         self.pub_detected = rospy.Publisher("/ar_detected", Bool, queue_size = 1)
@@ -75,12 +74,9 @@ class RotateWhileDetectingAr():
             yaw = 2*math.pi + yaw            
         return yaw        
 
-    def main(self):
-        # Publish Twist                
+    def main(self):        
         while not rospy.is_shutdown():            
-            if self.started and (self.previous_angle is not None):                               
-                #self.calculate_num_turns()
-                #print( "current turns is: {}".format(self.curr_turns))                 
+            if self.started and (self.previous_angle is not None):                                               
                 if self.new_ar_detected:                
                     self.pub_detected.publish(True)
                     self.pub_rotate_while_detecting_ar_ended.publish(True)                    
@@ -93,8 +89,7 @@ class RotateWhileDetectingAr():
                     self.started = False
                 else:                
                     self.pub_detected.publish(False)
-                    self.pub_rotate_while_detecting_ar_ended.publish(False)
-                    #self.cmd_vel_msg.angular.z = 0.2
+                    self.pub_rotate_while_detecting_ar_ended.publish(False)                    
                     self.cmd_vel_msg.angular.z = 0.5
                 self.cmd_vel_pub.publish(self.cmd_vel_msg)            
 
