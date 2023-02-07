@@ -50,6 +50,8 @@ class CenterAndApproach():
     def main(self):
         while not rospy.is_shutdown():
             if self.started:
+                self.prev_run_time = time.time()
+
                 self.command_velocity.linear.x = 0.0
                 self.command_velocity.angular.z = 0.0
                 self.calculate_error()
@@ -71,6 +73,18 @@ class CenterAndApproach():
                 elif self.distance_error <= 0.1:                    
                     self.center_and_approach_ended_publisher.publish(True)                    
                 self.command_velocity_publisher.publish(self.command_velocity)
+
+
+                # here we predict the next aruco pose so that if the camera lost arucos sight control still works
+                current_run_time = time.time()
+                current_angle_between_robot_and_aruco = nav_functions.angle_to_only_possitive( np.arctan2(self.aruco_position.y, self.aruco_position.x) )
+                next_angle_between_robot_and_aruco = current_angle_between_robot_and_aruco - self.command_velocity.angular.z*(current_run_time - self.prev_run_time)
+                next_aruco_x_position = self.aruco_position.x - self.command_velocity.linear.x*(current_run_time - self.prev_run_time) 
+                next_aruco_y_position = np.tan(next_angle_between_robot_and_aruco)*next_aruco_x_position             
+                self.aruco_position.x = next_aruco_x_position
+                self.aruco_position.y = next_aruco_y_position  
+                
+                
 
 if __name__ == "__main__":
     center_and_approach = CenterAndApproach()
