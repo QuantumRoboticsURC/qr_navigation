@@ -40,7 +40,7 @@ class FollowGPS():
         self.current_angle = None
         self.started = False
         self.first_time = True
-        self.distance_error_treshold = 0.25
+        self.distance_error_treshold = 0.4
         self.angular_error_treshold = 0.1            
 
         self.angular_kp = 0.3
