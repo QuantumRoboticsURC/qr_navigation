@@ -1,0 +1,4 @@
+<launch>
+  <node name="detect_aruco_video2" pkg="zed-implementations" type="detect_aruco_video_2.py" output="screen"/>
+  <node name="aruco_ole" pkg="qr_navigation" type="ArucoOle.py" output="screen"/>    
+</launch>
