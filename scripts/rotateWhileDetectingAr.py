@@ -4,6 +4,8 @@ from std_msgs.msg import Bool, String
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Point, Quaternion
 from tf.transformations import euler_from_quaternion, quaternion_from_euler #eeyyy
+from nav_helpers import nav_functions
+from constants import PlatfromConstants
 import math
 import copy
 import numpy as np
@@ -71,8 +73,7 @@ class RotateWhileDetectingAr():
     def calculate_angle(self, orientation_q):
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
         (_, _, yaw) = euler_from_quaternion(orientation_list)            
-        if np.sign(yaw) == -1.0:
-            yaw = 2*math.pi + yaw            
+        yaw = nav_functions.angle_to_only_possitive(yaw)            
         return yaw        
 
     def main(self):        
@@ -91,7 +92,7 @@ class RotateWhileDetectingAr():
                 else:                
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)                    
-                    self.cmd_vel_msg.angular.z = 0.5
+                    self.cmd_vel_msg.angular.z = PlatfromConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL
                 self.cmd_vel_pub.publish(self.cmd_vel_msg)            
 
 
