@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 from std_msgs.msg import Bool, String
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Point, Quaternion
-from tf.transformations import euler_from_quaternion, quaternion_from_euler #eeyyy
 from nav_helpers import nav_functions
 from constants import PlatfromConstants
 import math
@@ -72,7 +71,7 @@ class RotateWhileDetectingAr():
 
     def calculate_angle(self, orientation_q):
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-        (_, _, yaw) = euler_from_quaternion(orientation_list)            
+        (_, _, yaw) = nav_functions.euler_from_quaternion(orientation_list)            
         yaw = nav_functions.angle_to_only_possitive(yaw)            
         return yaw        
 
