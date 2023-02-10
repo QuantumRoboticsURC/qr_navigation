@@ -19,7 +19,7 @@ class RotateWhileDetectingAr():
         self.pub_detected = rospy.Publisher("/ar_detected", Bool, queue_size = 1)
         self.pub_rotate_while_detecting_ar_ended = rospy.Publisher("/rotate_while_detecting_ar_ended", Bool, queue_size = 1)
         self.cmd_vel_pub = rospy.Publisher("/rotate_while_detecting_ar_cmd_vel", Twist, queue_size=1)        
-        
+
         self.cmd_vel_msg = Twist()
         self.num_turns = 1.0
         self.new_ar_detected = False                
