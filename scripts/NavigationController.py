@@ -18,6 +18,7 @@ import sched, time
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
 from gps_tranforms import alvinxy as gps_transforms
+from constants import PlatfromConstants
 
 class NavigationController():
     def __init__(self):
@@ -34,7 +35,7 @@ class NavigationController():
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
 
-        self.gps_target_file = "/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/goal_cords.csv"
+        self.gps_target_file = PlatfromConstants.GPS_TARGET_CSV_PATH
         self.gps_arrived = False
         self.ar_detected = False
         self.rotate_while_detecting_ar_ended = False        
