@@ -50,11 +50,13 @@ class RotateWhileDetectingAr():
     def imu_pose_callback(self, data):
         if self.started:
             if self.first_time:                
-                self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
+                self.current_angle = self.calculate_angle(data.pose.pose.orientation)
+                self.current_angle = (self.current_angle + 1.309)%(2*math.pi) # TODO remove this offset when imu works                
                 self.first_time = False
             else:
                 self.previous_angle = self.current_angle                 
                 self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
+                self.current_angle = (self.current_angle + 1.309)%(2*math.pi) # TODO remove this offset when imu works
                 if self.previous_angle is not None:
                     self.calculate_num_turns()
                 
