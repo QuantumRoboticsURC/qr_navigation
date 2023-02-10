@@ -17,7 +17,6 @@ class CenterAndApproach():
         rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
         self.center_and_approach_ended_publisher = rospy.Publisher('/center_and_approach_ended', Bool, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/center_and_approach_cmd_vel', Twist, queue_size=1)        
-        self.center_and_approach_ended_msg = Bool()
         # ___ gains initialization ___
         # self.kp_angle_error = -0.00125   # comes from .4[rad/s] = +-320 [max error pixels] * kpae 
         self.kp_angle_error = PlatfromConstants.CENTER_AND_APPROACH_ANGULAR_KP

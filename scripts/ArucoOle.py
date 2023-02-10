@@ -16,7 +16,7 @@ class CenterAndApproach():
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)                
         # ___ gains initialization ___
         # self.kp_angle_error = -0.00125   # comes from .4[rad/s] = +-320 [max error pixels] * kpae 
-        self.kp_angle_error = 0.1
+        self.kp_angle_error = -0.1
         self.kp_distance_error = 0.1    # comes from  1[rad/s] = +-5 [max error meters] * kpde
         # ___ error initialization ___
         self.angle_error = 0.0
