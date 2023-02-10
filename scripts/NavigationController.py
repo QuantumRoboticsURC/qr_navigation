@@ -185,12 +185,12 @@ class NavigationController():
                 if self.gps_arrived == False:
                     self.control_node_in_turn_pub.publish("follow_gps")
                     self.command_velocity_publisher.publish(self.follow_gps_vel)
-                    self.matrix_signal_msg.data = 1 # change matrix to red 
+                    self.matrix_signal_msg.data = 2 # change matrix to red 
                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
                 else:
                     if self.target_point_type == "gps_only":
                         self.command_velocity_publisher.publish(self.stop_vel)
-                        self.matrix_signal_msg.data = 0 # change matrix to green
+                        self.matrix_signal_msg.data = 3 # change matrix to green
                         self.matrix_signal_publisher.publish(self.matrix_signal_msg)
                         self.autonomous_navigation_ended = True
                         # THIS IS THE END OF ROUTINE FOR GPS_ONLY
@@ -198,18 +198,18 @@ class NavigationController():
                         if not self.rotate_while_detecting_ar_ended:
                             self.control_node_in_turn_pub.publish("rotate_while_detecting_ar")
                             self.command_velocity_publisher.publish(self.rotate_while_detecting_ar_vel)
-                            self.matrix_signal_msg.data = 1
+                            self.matrix_signal_msg.data = 2
                             self.matrix_signal_publisher.publish(self.matrix_signal_msg)                        
                         else:                                                
                             if self.ar_detected:
                                 if not self.center_and_approach_ended:
                                     self.control_node_in_turn_pub.publish("center_and_approach")
                                     self.command_velocity_publisher.publish(self.center_and_approach_vel)
-                                    self.matrix_signal_msg.data = 1
+                                    self.matrix_signal_msg.data = 2
                                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)        
                                 else:                                
                                     self.command_velocity_publisher.publish(self.stop_vel)
-                                    self.matrix_signal_msg.data = 0
+                                    self.matrix_signal_msg.data = 3
                                     self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
                                     self.autonomous_navigation_ended = True
                                     # THIS IS THE END OF ROUTINE FOR GPS_AND_POST                                    

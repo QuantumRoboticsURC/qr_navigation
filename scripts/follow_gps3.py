@@ -86,7 +86,7 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
-                self.current_angle = (self.current_angle + 1.309)%(2*math.pi) # TODO remove this offset when imu works
+                self.current_angle = (self.current_angle - 1.309)%(2*math.pi) # TODO remove this offset when imu works
                 while True:
                     try:
                         self.read_target()
@@ -100,6 +100,7 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
+                self.current_angle = (self.current_angle - 1.309)%(2*math.pi) # TODO remove this
     
     def main(self):
         while not rospy.is_shutdown():            
