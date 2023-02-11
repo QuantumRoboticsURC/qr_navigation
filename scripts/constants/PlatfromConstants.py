@@ -11,9 +11,9 @@ The info of this platform is the following:
 
 # _____________ FOLLOW GPS CONSTANTS ________
 GPS_TARGET_CSV_PATH = "/home/quantum_main/catkin_ws/src/qr_navigation/scripts/csv_files/goal_cords.csv"
-FOLLOW_GPS_ANGULAR_ERROR_TRESHOLD = 0.2 # rads
+FOLLOW_GPS_ANGULAR_ERROR_TRESHOLD = 15 # degrees
 FOLLOW_GPS_LINEAR_ERROR_TRESHOLD = 2.5 # meters
-FOLLOW_GPS_ANGULAR_KP = 0.15
+FOLLOW_GPS_ANGULAR_KP = 0.0015
 FOLLOW_GPS_LINEAR_KP = 0.5
 FOLLOW_GPS_ANGULAR_SATURATION_VAL = 1.0*3.1416 
 FOLLOW_GPS_LINEAR_SATURATION_VAL = 0.6

@@ -117,10 +117,10 @@ class FollowGPS():
                 target_vector_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0],
                                                      self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
                 angle_error = nav_functions.angle_to_only_possitive_deg(nav_functions.rad2deg(math.atan2( target_vector_minus_robot_vector[1],
-                                                                                target_vector_minus_robot_vector[0]))) - self.current_angle
+                print ("angle erro: {}".format(angle_error))                                                                target_vector_minus_robot_vector[0]))) - self.current_angle
                 if angle_error < -180.0:
                     angle_error = nav_functions.angle_to_only_possitive_deg(angle_error)
-                print("angle error: {}".format(angle_error))
+                #print("angle error: {}".format(angle_error))
                 distance_error = nav_functions.euclidean_distance_single_point_2d( target_vector_minus_robot_vector )                          
                 if abs(angle_error) > self.angular_error_treshold:                                    
                     self.vel_msg.angular.z = nav_functions.saturate_signal(self.angular_kp*angle_error, PlatfromConstants.FOLLOW_GPS_ANGULAR_SATURATION_VAL)
