@@ -90,7 +90,7 @@ class FollowGPS():
                 self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )
                 self.current_angle = self.current_angle - 75.0 # TODO remove this                
                 #self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
-                print("CURRENT_ANGLE: {}".format(self.current_angle))
+                #print("CURRENT_ANGLE: {}".format(self.current_angle))
                 while True:
                     try:
                         self.read_target()
@@ -107,7 +107,7 @@ class FollowGPS():
                 self.current_angle = self.current_angle - 75.0
                 #self.current_angle = self.current_angle - 0.872665 # TODO remove this
                 #self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
-                print("CURRENT_ANGLE: {}".format(self.current_angle))
+                #print("CURRENT_ANGLE: {}".format(self.current_angle))
     
     def main(self):
         while not rospy.is_shutdown():            
@@ -120,7 +120,7 @@ class FollowGPS():
                                                                                 target_vector_minus_robot_vector[0]))) - self.current_angle
                 if angle_error < -180.0:
                     angle_error = nav_functions.angle_to_only_possitive_deg(angle_error)
-                #print("angle error: {}".format(angle_error))
+                print("angle error: {}".format(angle_error))
                 distance_error = nav_functions.euclidean_distance_single_point_2d( target_vector_minus_robot_vector )                          
                 if abs(angle_error) > self.angular_error_treshold:                                    
                     self.vel_msg.angular.z = nav_functions.saturate_signal(self.angular_kp*angle_error, PlatfromConstants.FOLLOW_GPS_ANGULAR_SATURATION_VAL)
