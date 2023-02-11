@@ -2,6 +2,7 @@
 
 import math
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 def calculate_yaw_angle(orientation_q):
     orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
@@ -45,6 +46,7 @@ def euler_from_quaternion(orientation_list):
     yaw is rotation around z in radians (counterclockwise)
     """
     x, y, z, w = orientation_list
+    """
     t0 = +2.0 * (w * x + y * z)
     t1 = +1.0 - 2.0 * (x * x + y * y)
     roll_x = math.atan2(t0, t1)
@@ -59,6 +61,11 @@ def euler_from_quaternion(orientation_list):
     yaw_z = math.atan2(t3, t4)
     
     return roll_x, pitch_y, yaw_z # in radians
+    """
+
+    r = Rotation.from_quat([x, y, z, w])
+    roll, pitch, yaw = r.as_euler('xyz')
+    return roll, pitch, yaw
 
 def saturate_signal(signal, saturation_value):
         if signal > abs(saturation_value):
