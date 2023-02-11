@@ -9,11 +9,27 @@ def calculate_yaw_angle(orientation_q):
     yaw = angle_to_only_possitive(yaw)
     return yaw  
 
+def calculate_yaw_angle_deg(orientation_q):
+    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+    (_, _, yaw) = euler_from_quaternion(orientation_list)
+    yaw = yaw*(180.0/math.pi)            
+    yaw = angle_to_only_possitive_deg(yaw)
+    return yaw  
+
+def angle_to_only_possitive_deg(angle):
+    theta = angle
+    if np.sign(theta) == -1.0:
+        theta = 180.0 + theta
+    return theta
+
 def angle_to_only_possitive(angle):
     theta = angle
     if np.sign(theta) == -1.0:
         theta = 2*math.pi + theta
     return theta
+
+def rad2deg(theta):
+    return theta*(180/math.pi)
 
 def euclidean_distance_point_to_point_2d(p1, p2):
     return math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
