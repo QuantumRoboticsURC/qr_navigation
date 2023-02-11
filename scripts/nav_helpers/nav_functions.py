@@ -20,7 +20,7 @@ def calculate_yaw_angle_deg(orientation_q):
 def angle_to_only_possitive_deg(angle):
     theta = angle
     if np.sign(theta) == -1.0:
-        theta = 180.0 + theta
+        theta = 360.0 + theta
     return theta
 
 def angle_to_only_possitive(angle):
