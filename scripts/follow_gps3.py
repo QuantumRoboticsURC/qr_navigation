@@ -117,7 +117,8 @@ class FollowGPS():
                 target_vector_minus_robot_vector = ( self.target_postition_xy_2d[0] - self.current_position_xy_2d[0],
                                                      self.target_postition_xy_2d[1] - self.current_position_xy_2d[1]  )
                 angle_error = nav_functions.angle_to_only_possitive_deg(nav_functions.rad2deg(math.atan2( target_vector_minus_robot_vector[1],
-                print ("angle erro: {}".format(angle_error))                                                                target_vector_minus_robot_vector[0]))) - self.current_angle
+                                                                                target_vector_minus_robot_vector[0]))) - self.current_angle
+                print ("angle erro: {}".format(angle_error))
                 if angle_error < -180.0:
                     angle_error = nav_functions.angle_to_only_possitive_deg(angle_error)
                 #print("angle error: {}".format(angle_error))
