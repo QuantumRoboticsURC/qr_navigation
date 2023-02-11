@@ -86,8 +86,8 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
-                self.current_angle = self.current_angle - 0.872665 # TODO remove this                
-                self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
+                #self.current_angle = self.current_angle - 0.872665 # TODO remove this                
+                #self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
                 print("CURRENT_ANGLE: {}".format(self.current_angle))
                 while True:
                     try:
@@ -102,8 +102,8 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle( data.pose.pose.orientation )
-                self.current_angle = self.current_angle - 0.872665 # TODO remove this
-                self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
+                #self.current_angle = self.current_angle - 0.872665 # TODO remove this
+                #self.current_angle = nav_functions.angle_to_only_possitive(self.current_angle)
                 print("CURRENT_ANGLE: {}".format(self.current_angle))
     
     def main(self):
