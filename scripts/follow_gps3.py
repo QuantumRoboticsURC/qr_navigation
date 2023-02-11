@@ -47,6 +47,8 @@ class FollowGPS():
         self.angular_kp = PlatfromConstants.FOLLOW_GPS_ANGULAR_KP        
         self.linear_kp = PlatfromConstants.FOLLOW_GPS_LINEAR_KP
 
+        self.rate = rospy.Rate(20)
+
     def reset_values(self):        
         self.vel_msg = Twist()
         self.initial_position_ll_2d = (None, None)        
@@ -127,7 +129,9 @@ class FollowGPS():
                 elif distance_error <= self.distance_error_treshold:                    
                     self.gps_arrived_pub.publish(True)
                     self.started = False                    
-                self.vel_pub.publish(self.vel_msg)            
+                self.vel_pub.publish(self.vel_msg)  
+
+            self.rate.sleep()          
 
 if __name__ == "__main__":
     follow_gps = FollowGPS()
