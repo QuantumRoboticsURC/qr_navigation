@@ -2,5 +2,6 @@
 /CMakeLists.txt
 /include/*
 **/PlatformConstants.py
-*.pyc
+**.pyc
+**.save
 __pycache__/
