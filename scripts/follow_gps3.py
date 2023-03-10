@@ -19,7 +19,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Bool, String
-from scripts.constants import PlatformConstants
+from constants import PlatformConstants
 from gps_tranforms import alvinxy as gps_tranforms
 from nav_helpers import nav_functions
 

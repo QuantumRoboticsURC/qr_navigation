@@ -18,7 +18,7 @@ import sched, time
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
 from gps_tranforms import alvinxy as gps_transforms
-from scripts.constants import PlatformConstants
+from constants import PlatformConstants
 
 class NavigationController():
     def __init__(self):

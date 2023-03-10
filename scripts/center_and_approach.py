@@ -4,7 +4,7 @@ import rospy
 import numpy as np
 import time
 from nav_helpers import nav_functions
-from scripts.constants import PlatformConstants
+from constants import PlatformConstants
 from std_msgs.msg import Bool, String
 from geometry_msgs.msg import Point, Twist
 
