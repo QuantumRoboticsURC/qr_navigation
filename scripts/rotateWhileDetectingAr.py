@@ -4,7 +4,7 @@ from std_msgs.msg import Bool, String
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist, Point, Quaternion
 from nav_helpers import nav_functions
-from constants import PlatfromConstants
+from scripts.constants import PlatformConstants
 import math
 import copy
 import numpy as np
@@ -91,7 +91,7 @@ class RotateWhileDetectingAr():
                 else:                
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)                    
-                    self.cmd_vel_msg.angular.z = PlatfromConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL
+                    self.cmd_vel_msg.angular.z = PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL
                 self.cmd_vel_pub.publish(self.cmd_vel_msg)            
 
 

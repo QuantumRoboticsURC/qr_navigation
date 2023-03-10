@@ -19,7 +19,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import NavSatFix
 from std_msgs.msg import Bool, String
-from constants import PlatfromConstants
+from scripts.constants import PlatformConstants
 from gps_tranforms import alvinxy as gps_tranforms
 from nav_helpers import nav_functions
 
@@ -33,7 +33,7 @@ class FollowGPS():
         self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
         self.vel_msg = Twist()
 
-        self.gps_target_file = PlatfromConstants.GPS_TARGET_CSV_PATH
+        self.gps_target_file = PlatformConstants.GPS_TARGET_CSV_PATH
         self.initial_position_ll_2d = (None, None)
         # we dont save initial position in x y meters since inital position will always be 0
         self.current_position_xy_2d = (None, None)
@@ -41,11 +41,11 @@ class FollowGPS():
         self.current_angle = None
         self.started = False
         self.first_time = True
-        self.angular_error_treshold = PlatfromConstants.FOLLOW_GPS_ANGULAR_ERROR_TRESHOLD
-        self.distance_error_treshold = PlatfromConstants.FOLLOW_GPS_LINEAR_ERROR_TRESHOLD                    
+        self.angular_error_treshold = PlatformConstants.FOLLOW_GPS_ANGULAR_ERROR_TRESHOLD
+        self.distance_error_treshold = PlatformConstants.FOLLOW_GPS_LINEAR_ERROR_TRESHOLD                    
 
-        self.angular_kp = PlatfromConstants.FOLLOW_GPS_ANGULAR_KP        
-        self.linear_kp = PlatfromConstants.FOLLOW_GPS_LINEAR_KP
+        self.angular_kp = PlatformConstants.FOLLOW_GPS_ANGULAR_KP        
+        self.linear_kp = PlatformConstants.FOLLOW_GPS_LINEAR_KP
 
         self.rate = rospy.Rate(20)
 
@@ -124,9 +124,9 @@ class FollowGPS():
                 #print("angle error: {}".format(angle_error))
                 distance_error = nav_functions.euclidean_distance_single_point_2d( target_vector_minus_robot_vector )                          
                 if abs(angle_error) > self.angular_error_treshold:                                    
-                    self.vel_msg.angular.z = nav_functions.saturate_signal(self.angular_kp*angle_error, PlatfromConstants.FOLLOW_GPS_ANGULAR_SATURATION_VAL)
+                    self.vel_msg.angular.z = nav_functions.saturate_signal(self.angular_kp*angle_error, PlatformConstants.FOLLOW_GPS_ANGULAR_SATURATION_VAL)
                 elif distance_error > self.distance_error_treshold:                    
-                    self.vel_msg.linear.x = nav_functions.saturate_signal(self.linear_kp*distance_error, PlatfromConstants.FOLLOW_GPS_LINEAR_SATURATION_VAL)
+                    self.vel_msg.linear.x = nav_functions.saturate_signal(self.linear_kp*distance_error, PlatformConstants.FOLLOW_GPS_LINEAR_SATURATION_VAL)
                     self.gps_arrived_pub.publish(False)
                 elif distance_error <= self.distance_error_treshold:                    
                     self.gps_arrived_pub.publish(True)
