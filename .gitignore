@@ -1,6 +1,6 @@
 /package.xml
 /CMakeLists.txt
 /include/*
-/scripts/constants/PlatfromConstants.py
+scripts/constants/PlatfromConstants.py
 *.pyc
 __pycache__/
