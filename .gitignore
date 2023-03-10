@@ -2,3 +2,4 @@
 /CMakeLists.txt
 /include/*
 /scripts/constants/PlatfromConstants.py
+*.pyc
