@@ -26,11 +26,11 @@ def angle_to_only_possitive_deg(angle):
 def angle_to_only_possitive(angle):
     theta = angle
     if np.sign(theta) == -1.0:
-        theta = 2*math.pi + theta
+        theta = 2.0*math.pi + theta
     return theta
 
 def rad2deg(theta):
-    return theta*(180/math.pi)
+    return theta*(180.0/math.pi)
 
 def euclidean_distance_point_to_point_2d(p1, p2):
     return math.sqrt( (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 )
