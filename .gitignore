@@ -2,6 +2,7 @@
 /CMakeLists.txt
 /include/*
 **/PlatformConstants.py
-**.pyc
-**.save
-__pycache__/
+**/scripts/csv_files/goal_cords.csv
+*.pyc
+*.save
+**/__pycache__/
