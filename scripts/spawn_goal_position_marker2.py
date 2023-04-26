@@ -100,6 +100,8 @@ class MarkerSpawner():
 
     def main(self):
         while not rospy.is_shutdown():
+            self.read_target()
+            self.generate_snail_trayectory_points()
             for point in self.snail_trayectory_xy_points:
                 if point == (self.target_x, self.target_y):
                     self.build_marker(point[0], point[1], (0.0, 1.0, 0.0))

@@ -1,5 +1,3 @@
-/package.xml
-/CMakeLists.txt
 /include/*
 **/PlatformConstants.py
 **/scripts/csv_files/goal_cords.csv
