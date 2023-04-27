@@ -21,7 +21,7 @@ class RotateWhileDetectingAr():
         self.cmd_vel_pub = rospy.Publisher("/rotate_while_detecting_ar_cmd_vel", Twist, queue_size=1)        
 
         self.cmd_vel_msg = Twist()
-        self.num_turns = 1.0
+        self.num_turns = 0.85
         self.new_ar_detected = False                
         self.curr_turns = 0.0     
         self.angle_displaced = 0.0           
@@ -62,7 +62,9 @@ class RotateWhileDetectingAr():
         self.new_ar_detected = True
 
     def calculate_num_turns(self):
-        if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL >= 0.0:
+        if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL <= 0.0:
+            # consider that for q-mars on 2023 season a positive angular vel 
+            # produces a clockwise turn and not a counterclockwise turn 
             if self.current_angle > self.previous_angle:        
                 self.angle_displaced += abs(self.current_angle - self.previous_angle)
             elif (self.current_angle + math.pi) < self.previous_angle:
