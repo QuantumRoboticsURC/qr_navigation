@@ -28,7 +28,9 @@ class RotateWhileDetectingAr():
         self.started = False
         self.first_time = True        
         self.current_angle = None
-        self.previous_angle = None                                
+        self.previous_angle = None
+
+        self.rate = rospy.Rate(5.0)                                
 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
@@ -50,24 +52,30 @@ class RotateWhileDetectingAr():
     def imu_pose_callback(self, data):
         if self.started:
             if self.first_time:                
+                self.previous_angle = self.calculate_angle(data.pose.pose.orientation)
                 self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
                 self.first_time = False
-            else:
-                self.previous_angle = self.current_angle                 
-                self.current_angle = self.calculate_angle(data.pose.pose.orientation)                
-                if self.previous_angle is not None:
-                    self.calculate_num_turns()
+            else:                
+                self.current_angle = self.calculate_angle(data.pose.pose.orientation)
                 
     def ar_detected_callback(self, data):        
         self.new_ar_detected = True
 
     def calculate_num_turns(self):
-        if self.current_angle >= self.previous_angle:        
-            self.angle_displaced += self.current_angle - self.previous_angle
-        elif self.current_angle + math.pi < self.previous_angle:
-            # angle restarted
-            self.angle_displaced += self.current_angle + (2*math.pi-self.previous_angle)
-        self.curr_turns = self.angle_displaced/(2*math.pi)
+        if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL >= 0.0:
+            if self.current_angle > self.previous_angle:        
+                self.angle_displaced += abs(self.current_angle - self.previous_angle)
+            elif (self.current_angle + math.pi) < self.previous_angle:
+                # angle restarted
+                self.angle_displaced += abs(self.current_angle - self.previous_angle + 2.0*math.pi)
+        else:
+            if self.current_angle < self.previous_angle:        
+                self.angle_displaced += abs(self.current_angle - self.previous_angle)
+            elif (self.previous_angle + math.pi) < self.current_angle:
+                # angle restarted
+                self.angle_displaced += abs(self.current_angle - self.previous_angle - 2.0*math.pi)
+        print("angle displaced: {a}".format(a = self.angle_displaced))
+        self.curr_turns = self.angle_displaced/(2.0*math.pi)
 
     def calculate_angle(self, orientation_q):
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
@@ -77,7 +85,9 @@ class RotateWhileDetectingAr():
 
     def main(self):        
         while not rospy.is_shutdown():            
-            if self.started and (self.previous_angle is not None):                                               
+            if self.started and (self.previous_angle is not None):
+                self.calculate_num_turns()
+                self.previous_angle = self.current_angle                                               
                 if self.new_ar_detected:                
                     self.pub_detected.publish(True)
                     self.pub_rotate_while_detecting_ar_ended.publish(True)                    
@@ -93,6 +103,7 @@ class RotateWhileDetectingAr():
                     self.pub_rotate_while_detecting_ar_ended.publish(False)                    
                     self.cmd_vel_msg.angular.z = PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL
                 self.cmd_vel_pub.publish(self.cmd_vel_msg)            
+            self.rate.sleep()
 
 
 if __name__ == "__main__":

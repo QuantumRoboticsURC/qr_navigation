@@ -103,7 +103,7 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )
                 # self.current_angle = self.current_angle -30.0 # TODO remove this                                 
-            print("CURRENT_ANGLE: {}".format(self.current_angle))
+            #print("CURRENT_ANGLE: {}".format(self.current_angle))
     
     def main(self):
         while not rospy.is_shutdown():            
