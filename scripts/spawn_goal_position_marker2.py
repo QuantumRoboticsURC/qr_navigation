@@ -9,6 +9,8 @@ Notes:
 """
 import rospy
 import pandas as pd
+import rospkg
+import os
 from gps_tranforms import alvinxy as gps_transforms
 from visualization_msgs.msg import Marker
 
@@ -19,7 +21,9 @@ class MarkerSpawner():
         rospy.init_node("marker_spawner")
         self.marker_pub = rospy.Publisher('/visualization_marker', Marker, queue_size=1)
         self.marker_msg = Marker()
-        self.gps_target_file = "/home/jose/Documents/quantum/quantum_ws/src/qr_navigation/scripts/csv_files/joses_tests.csv"
+        rp = rospkg.RosPack()
+        this_pkg_path = rp.get_path('qr_navigation')
+        self.gps_target_file = os.path.join(this_pkg_path,'scripts','csv_files','joses_tests.csv')
         self.rate = rospy.Rate(0.5)
 
         self.snail_trayectory_xy_points = []
