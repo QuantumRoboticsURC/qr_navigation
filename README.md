@@ -26,7 +26,7 @@ The nodes that are in the diagram and are not listed on this table are in a diff
 2. To ensure the simulation is working correctly try to control the robot frame by publishing cmd_vel commands or using [teleop_twist_keyboard package](http://wiki.ros.org/teleop_twist_keyboard)
 3. Shutdown simulation
 4. install scipy `sudo apt-get install python-scipy`
-5. download the goal_cords.csv from https://drive.google.com/file/d/162WAmKPpsz9Ijh7pRWXOlKF_yeda1pRu/view?usp=sharing and add it to scripts/csv_files/
+5. download the goal_cords.csv from: https://drive.google.com/file/d/162WAmKPpsz9Ijh7pRWXOlKF_yeda1pRu/view?usp=sharing and add it to scripts/csv_files/
 6. download the PlatformConstants.py file from: https://drive.google.com/file/d/1qY5XLYchEzVca6yHr_x8ijH4i8eW4CFZ/view?usp=sharingat and add it to: scripts/constants/
     61. Modify the path at PlatformConstants.py to where you added the goal_cords
 7. run the command `roslaunch qr_navigation autonomous_puzzlebot_sim.launch`
