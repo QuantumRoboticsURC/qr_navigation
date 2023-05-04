@@ -22,7 +22,7 @@ if __name__ == '__main__':
         LatitudLabel.place(x=0,y=100)
         latitud = Text(width=20,height=4,bg="white")
         latitud.place(x=150,y=100)
-        LongitudLabel = Label(window,width=20,height=3,text="Latitud",background="black",fg="white")
+        LongitudLabel = Label(window,width=20,height=3,text="Longitud",background="black",fg="white")
         LongitudLabel.place(x=0,y=200)
         longitud = Text(width=20,height=4,bg="white")
         longitud.place(x=150,y=200)
