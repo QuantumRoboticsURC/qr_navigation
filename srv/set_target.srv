@@ -1,6 +1,7 @@
 
 float64 latitud
 float64 longitud
-
-
+---
+float64 latitud2
+float64 longitud2
 
