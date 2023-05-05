@@ -84,21 +84,38 @@ def calculate_angular_error_considering_upper_boundary_lag(target_angle, current
     this function calculates angular error considering analysis found 
     at [dagrams/angle_error_exception.jpeg](/diagrams/angle_error_exception.jpeg)    
     """ 
+
+    
+
     if (( deg_or_rad == "deg" and (angle_reference_range == (-180.0, 180.0) or angle_reference_range == (0.0, 360.0)) ) or
     ( deg_or_rad == "rad" and (angle_reference_range == (-math.pi, math.pi) or angle_reference_range == (0.0, 2*math.pi)) )):
+
+        err = target_angle - current_angle        
+
         if angle_reference_range == (0.0, 360.0) or angle_reference_range == (0.0, 2*math.pi):
-            err = target_angle - current_angle
+
             #correct case 2A and 2B            
             if target_angle < (angle_reference_range[1]/2.0) and current_angle > (angle_reference_range[1]/2.0) and (current_angle >= (target_angle + angle_reference_range[1]/2.0)): 
                 #case 2A                
-                return err + angle_reference_range[1]
+                err += angle_reference_range[1]
             elif current_angle < (angle_reference_range[1]/2.0) and target_angle > (angle_reference_range[1]/2.0) and (target_angle >= (current_angle + angle_reference_range[1]/2.0)):
                 #case 2B                
-                return err - angle_reference_range[1]
-            else:
-                return err
+                err -= angle_reference_range[1]
+
+        elif angle_reference_range == (-180.0, 180.0) or angle_reference_range == (-math.pi, math.pi):
+
+            if (target_angle > angle_reference_range[0]) and (target_angle < angle_reference_range[0]/2.0) and (current_angle < angle_reference_range[1]) and (current_angle > angle_reference_range[1]/2.0):
+
+                err = abs((angle_reference_range[0]-target_angle)-(angle_reference_range[1]-current_angle))
+
+            elif (current_angle > angle_reference_range[0]) and (current_angle < angle_reference_range[0]/2.0) and (target_angle < angle_reference_range[1]) and (target_angle > angle_reference_range[1]/2.0):
+                
+                err = -abs((angle_reference_range[1]-target_angle)-(angle_reference_range[0]-current_angle))
+
         else:
-            #correct case 3A and 3B
+
             pass
+
+        return err
     else:
         Exception("calculate_angular_error_considering_upper_boundary_lag: discrepancy in angle units or reference range")
