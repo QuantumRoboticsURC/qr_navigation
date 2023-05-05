@@ -1,7 +1,8 @@
 
 float64 latitud
 float64 longitud
+string mode
 ---
 float64 latitud2
 float64 longitud2
-
+string mode2

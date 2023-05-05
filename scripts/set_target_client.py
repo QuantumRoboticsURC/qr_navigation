@@ -1,18 +1,19 @@
 import rospy
-from coords.srv import set_target, set_targetRequest
+from qr_navigation.srv import set_target, set_targetRequest
 from tkinter import *
 from inspect import *
 from tkinter import ttk
 
 def client(latitud,longitud,message):
     print(message)
-    result=set_target_function(latitud,longitud)
-    print(result.latitud_r)
-    print(result.longitud_r)
+    result=set_target_function(latitud,longitud,message)
+    print(result.latitud2)
+    print(result.longitud2)
+    print(result.mode2)
 
 if __name__ == '__main__':
     try:
-        set_target_function = rospy.ServiceProxy('get_target', set_target)
+        set_target_function = rospy.ServiceProxy('set_target', set_target)
         window = Tk()
         window.geometry("500x500")
         window.configure(bg="black")
