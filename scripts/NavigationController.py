@@ -17,6 +17,7 @@ import pandas as pd
 import sched, time
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
+from qr_navigation.srv import set_target,set_targetRequest,set_targetResponse
 from gps_tranforms import alvinxy as gps_transforms
 from constants import PlatformConstants
 
@@ -138,39 +139,15 @@ class NavigationController():
         df.to_csv(self.gps_target_file, index=False)        
 
     def get_target_point_type(self):
-        valid_target_point_types = ["gps_only", "gps_and_post", "gps_and_gate"]
-        while True:
-            try:
-                print("which is the type of target we are going,  plase select one of the following or its respective index \n {targs}".format(targs = valid_target_point_types))
-                user_input = input("type is: ")
-                print("\n")
-                if user_input in valid_target_point_types or int(user_input) < len(valid_target_point_types):
-                    if user_input in valid_target_point_types:
-                        self.target_point_type = user_input
-                    else:
-                        self.target_point_type = valid_target_point_types[int(user_input)]
-                    break
-                else:
-                    raise Exception("invalid input")
-            except:
-                print("invalid input, plese select one of the target point types in the list")
-                print("\n")
+        get_target_function = rospy.ServiceProxy('get_target', set_target)
+        result = get_target_function
+        self.target_point_type=result.mode2
 
     def get_gps_target(self):
-        while True:
-            try:
-                user_input = eval(
-                    input("What are the lat and long cords of next point, please wirte '(lat, long)': ")
-                )
-                print("\n")
-                if len(user_input) != 2 or type(user_input) != tuple:
-                    raise Exception("Invalid input")
-                else:
-                    self.target_latitude, self.target_longitude = user_input
-                    break                
-            except:
-                print("invalid input, please give me a tuple with latitude and longitude units")
-                print("\n")
+        get_target_function = rospy.ServiceProxy('get_target', set_target)
+        result = get_target_function
+        self.target_latitude = result.latitud2
+        self.target_latitude = result.longitud2
 
     def unblock_new_follow_gps_and_rotate_while_detecting_ar_data(self):
         self.block_new_follow_gps_data = False
