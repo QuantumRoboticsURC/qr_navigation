@@ -30,6 +30,8 @@ class RotateWhileDetectingAr():
         self.current_angle = None
         self.previous_angle = None
 
+        self.reference_frame_z_points_up = PlatformConstants.REFERENCE_FRAME_Z_AXIS_POINTS_UP
+
         self.rate = rospy.Rate(5.0)                                
 
     def turn_checker_callback(self, data):
@@ -62,20 +64,37 @@ class RotateWhileDetectingAr():
         self.new_ar_detected = True
 
     def calculate_num_turns(self):
-        if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL <= 0.0:
-            # consider that for q-mars on 2023 season a positive angular vel 
-            # produces a clockwise turn and not a counterclockwise turn 
-            if self.current_angle > self.previous_angle:        
-                self.angle_displaced += abs(self.current_angle - self.previous_angle)
-            elif (self.current_angle + math.pi) < self.previous_angle:
-                # angle restarted
-                self.angle_displaced += abs(self.current_angle - self.previous_angle + 2.0*math.pi)
+        if not self.reference_frame_z_points_up:
+            if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL <= 0.0:
+                # consider that for q-mars on 2023 season a positive angular vel 
+                # produces a clockwise turn and not a counterclockwise turn 
+                if self.current_angle > self.previous_angle:        
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle)
+                elif (self.current_angle + math.pi) < self.previous_angle:
+                    # angle restarted
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle + 2.0*math.pi)
+            else:
+                if self.current_angle < self.previous_angle:        
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle)
+                elif (self.previous_angle + math.pi) < self.current_angle:
+                    # angle restarted
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle - 2.0*math.pi)
         else:
-            if self.current_angle < self.previous_angle:        
-                self.angle_displaced += abs(self.current_angle - self.previous_angle)
-            elif (self.previous_angle + math.pi) < self.current_angle:
-                # angle restarted
-                self.angle_displaced += abs(self.current_angle - self.previous_angle - 2.0*math.pi)
+            if PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL >= 0.0:
+                # consider that for q-mars on 2023 season a positive angular vel 
+                # produces a clockwise turn and not a counterclockwise turn 
+                if self.current_angle > self.previous_angle:        
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle)
+                elif (self.current_angle + math.pi) < self.previous_angle:
+                    # angle restarted
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle + 2.0*math.pi)
+            else:
+                if self.current_angle < self.previous_angle:        
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle)
+                elif (self.previous_angle + math.pi) < self.current_angle:
+                    # angle restarted
+                    self.angle_displaced += abs(self.current_angle - self.previous_angle - 2.0*math.pi)
+
         print("angle displaced: {a}".format(a = self.angle_displaced))
         self.curr_turns = self.angle_displaced/(2.0*math.pi)
 
