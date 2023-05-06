@@ -19,6 +19,7 @@ from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
 from gps_tranforms import alvinxy as gps_transforms
 from constants import PlatformConstants
+from qr_navigation.srv import *
 
 class NavigationController():
     def __init__(self):
@@ -64,6 +65,20 @@ class NavigationController():
         
         print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
         print("target type is {t}".format(t = self.target_point_type))
+
+        self.reset_follow_gps()
+
+
+    def reset_follow_gps(self):
+        rospy.wait_for_service("Reset_follow_gps")
+        try:
+            resetFollowGps = rospy.ServiceProxy("Reset_follow_gps", reset_follow_gps)
+            response = resetFollowGps()
+            print("Follow GPS reseted successfully")
+            return response.success
+        
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
 
     def rotate_while_detecting_ar_ended_callback(self, data):
         if not self.block_new_rotate_while_detecting_ar_data:

@@ -22,13 +22,17 @@ from std_msgs.msg import Bool, String
 from constants import PlatformConstants
 from gps_tranforms import alvinxy as gps_tranforms
 from nav_helpers import nav_functions
-
+from qr_navigation.srv import *
 
 class FollowGPS():
     def __init__(self):
         rospy.init_node("follow_gps")
+
         rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
-        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1) 
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
+
+        rospy.Service("Reset_follow_gps", reset_follow_gps, self.callback_reset_follow_gps)
+
         self.gps_arrived_pub = rospy.Publisher("/gps_arrived", Bool, queue_size = 1)
         self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
         self.vel_msg = Twist()
@@ -47,7 +51,12 @@ class FollowGPS():
         self.angular_kp = PlatformConstants.FOLLOW_GPS_ANGULAR_KP        
         self.linear_kp = PlatformConstants.FOLLOW_GPS_LINEAR_KP
 
-        self.rate = rospy.Rate(20)        
+        self.rate = rospy.Rate(20)
+
+    def callback_reset_follow_gps(self, req):
+        self.reset_values()
+        print("Follow GPS reseted successfully")
+        return reset_follow_gpsResponse(True)
 
     def reset_values(self):        
         self.vel_msg = Twist()
