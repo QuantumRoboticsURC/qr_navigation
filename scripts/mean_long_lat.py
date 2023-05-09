@@ -30,11 +30,12 @@ class MeanLongLat():
 
     def main(self):
         while not rospy.is_shutdown():
-            if self.i < 100:
+            if self.latitude is not None and self.longitude is not None:
+              if self.i < 100:
                 self.stack_lat.append(self.latitude)
                 self.stack_long.append(self.longitude)
                 self.i += 1
-            else:
+              else:
                 print(np.mean(self.stack_lat),np.mean(self.stack_long))
                 self.stack_lat = []
                 self.stack_long = []

@@ -22,16 +22,17 @@ class CenterAndApproach():
         self.kp_angle_error = PlatformConstants.CENTER_AND_APPROACH_ANGULAR_KP
         self.kp_distance_error = PlatformConstants.CENTER_AND_APPROACH_LINEAR_KP    # comes from  1[rad/s] = +-5 [max error meters] * kpde
         # ___ error initialization ___
-        self.angle_error = 0.0
-        self.distance_error = PlatformConstants.CENTER_AND_APPROACH_LINEAR_SET_POINT + PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD + 0.01        
+        self.angle_error = None
+        self.distance_error = None        
         # ___ vel command ___
         self.command_velocity = Twist()
         self.prev_angular_velocity = 0.0
         self.wheel_overshot_softener = 1.0
         self.overshoot_softener_value_changed_time = 0.0
         
-        self.aruco_position = Point()
+        self.aruco_position = None
         self.started = False        
+        self.arrived_counter = 0
 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
@@ -41,7 +42,9 @@ class CenterAndApproach():
             self.started = False
 
     def aruco_position_callback(self, data):        
-        self.aruco_position = data 
+        self.aruco_position = data
+        if self.started:
+            self.calculate_error() 
 
     def calculate_error(self):
         self.angle_error = self.aruco_position.y  
@@ -49,12 +52,14 @@ class CenterAndApproach():
 
     def main(self):
         while not rospy.is_shutdown():
-            if self.started:
+            if self.started and self.angle_error is not None and self.distance_error is not None:
                 self.prev_run_time = time.time()
 
                 self.command_velocity.linear.x = 0.0
                 self.command_velocity.angular.z = 0.0
-                self.calculate_error()
+                #self.calculate_error()
+                if self.arrived_counter >= 2000:
+                    self.center_and_approach_ended_publisher.publish(True)
                 if abs(self.angle_error) > PlatformConstants.CENTER_AND_APPROACH_ANGULAR_ERROR_TRESHOLD:
                     candidate_angular_vel = self.angle_error * self.kp_angle_error
                     if ((time.time() - self.overshoot_softener_value_changed_time) >= 1.0) and (self.wheel_overshot_softener < 1.0):
@@ -66,12 +71,15 @@ class CenterAndApproach():
                     self.wheel_overshot_softener = nav_functions.saturate_signal(self.wheel_overshot_softener, 1.0)                    
                     self.command_velocity.angular.z = nav_functions.saturate_signal(candidate_angular_vel * self.wheel_overshot_softener, PlatformConstants.CENTER_AND_APPROACH_ANGULAR_SATURATION_VAL)
                     self.prev_angular_velocity = candidate_angular_vel                                        
+                    self.arrived_counter = 0
                 elif self.distance_error > PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:
                     candidate_linear_vel = self.distance_error * self.kp_distance_error
                     self.command_velocity.linear.x = nav_functions.saturate_signal(candidate_linear_vel, PlatformConstants.CENTER_AND_APPROACH_LINEAR_SATURATION_VAL)                                        
-                    self.center_and_approach_ended_publisher.publish(False)                
+                    self.arrived_counter = 0
+                    #self.center_and_approach_ended_publisher.publish(False)                
                 elif self.distance_error <= PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:                    
-                    self.center_and_approach_ended_publisher.publish(True)                    
+                    #self.center_and_approach_ended_publisher.publish(True)                    
+                    self.arrived_counter += 1
                 self.command_velocity_publisher.publish(self.command_velocity)
 
 
