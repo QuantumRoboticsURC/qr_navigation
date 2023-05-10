@@ -39,7 +39,16 @@ class CenterAndApproach():
         if control_node_in_turn == "center_and_approach":
             self.started = True
         else:
-            self.started = False
+            self.reset_values()
+
+    def reset_values(self):
+        self.command_velocity = Twist()
+        self.prev_angular_velocity = 0.0
+        self.wheel_overshot_softener = 1.0
+        self.overshoot_softener_value_changed_time = 0.0        
+        self.aruco_position = None
+        self.started = False        
+        self.arrived_counter = 0
 
     def aruco_position_callback(self, data):        
         self.aruco_position = data
