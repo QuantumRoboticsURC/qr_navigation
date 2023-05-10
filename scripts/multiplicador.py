@@ -12,7 +12,7 @@ vel_z = 0.0
 vel_x = 0.0
 rospy.init_node('cmd_vel_multiplier')
 
-sub = rospy.Subscriber ('/center_and_approach_cmd_vel', Twist, get_rotation)
+sub = rospy.Subscriber ('/cmd_vel', Twist, get_rotation)
 pub = sub = rospy.Publisher ('/mr/cmd_vel', Twist, queue_size=1)
 
 r = rospy.Rate(5)

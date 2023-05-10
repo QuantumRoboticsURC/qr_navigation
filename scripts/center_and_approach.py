@@ -33,15 +33,17 @@ class CenterAndApproach():
         self.aruco_position = None
         self.started = False        
         self.arrived_counter = 0
-
+                
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
         if control_node_in_turn == "center_and_approach":
             self.started = True
-        else:
+        else:            
             self.reset_values()
 
     def reset_values(self):
+        self.angle_error = None
+        self.distance_error = None
         self.command_velocity = Twist()
         self.prev_angular_velocity = 0.0
         self.wheel_overshot_softener = 1.0
@@ -61,46 +63,48 @@ class CenterAndApproach():
 
     def main(self):
         while not rospy.is_shutdown():
-            if self.started and self.angle_error is not None and self.distance_error is not None:
-                self.prev_run_time = time.time()
+            if self.started and self.angle_error is not None and self.distance_error is not None:                
+                try:
+                    self.prev_run_time = time.time()
 
-                self.command_velocity.linear.x = 0.0
-                self.command_velocity.angular.z = 0.0
-                #self.calculate_error()
-                if self.arrived_counter >= 2000:
-                    self.center_and_approach_ended_publisher.publish(True)
-                if abs(self.angle_error) > PlatformConstants.CENTER_AND_APPROACH_ANGULAR_ERROR_TRESHOLD:
-                    candidate_angular_vel = self.angle_error * self.kp_angle_error
-                    if ((time.time() - self.overshoot_softener_value_changed_time) >= 1.0) and (self.wheel_overshot_softener < 1.0):
-                        self.wheel_overshot_softener += 0.1
-                        self.overshoot_softener_value_changed_time = time.time()                
-                    if np.sign(candidate_angular_vel) != np.sign(self.prev_angular_velocity):
-                        self.wheel_overshot_softener = 0.1
-                        self.overshoot_softener_value_changed_time = time.time()            
-                    self.wheel_overshot_softener = nav_functions.saturate_signal(self.wheel_overshot_softener, 1.0)                    
-                    self.command_velocity.angular.z = nav_functions.saturate_signal(candidate_angular_vel * self.wheel_overshot_softener, PlatformConstants.CENTER_AND_APPROACH_ANGULAR_SATURATION_VAL)
-                    self.prev_angular_velocity = candidate_angular_vel                                        
-                    self.arrived_counter = 0
-                elif self.distance_error > PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:
-                    candidate_linear_vel = self.distance_error * self.kp_distance_error
-                    self.command_velocity.linear.x = nav_functions.saturate_signal(candidate_linear_vel, PlatformConstants.CENTER_AND_APPROACH_LINEAR_SATURATION_VAL)                                        
-                    self.arrived_counter = 0
-                    #self.center_and_approach_ended_publisher.publish(False)                
-                elif self.distance_error <= PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:                    
-                    #self.center_and_approach_ended_publisher.publish(True)                    
-                    self.arrived_counter += 1
-                self.command_velocity_publisher.publish(self.command_velocity)
+                    self.command_velocity.linear.x = 0.0
+                    self.command_velocity.angular.z = 0.0
+                    #self.calculate_error()
+                    if self.arrived_counter >= 2000:
+                        self.center_and_approach_ended_publisher.publish(True)
+                    if abs(self.angle_error) > PlatformConstants.CENTER_AND_APPROACH_ANGULAR_ERROR_TRESHOLD:
+                        candidate_angular_vel = self.angle_error * self.kp_angle_error
+                        if ((time.time() - self.overshoot_softener_value_changed_time) >= 1.0) and (self.wheel_overshot_softener < 1.0):
+                            self.wheel_overshot_softener += 0.1
+                            self.overshoot_softener_value_changed_time = time.time()                
+                        if np.sign(candidate_angular_vel) != np.sign(self.prev_angular_velocity):
+                            self.wheel_overshot_softener = 0.1
+                            self.overshoot_softener_value_changed_time = time.time()            
+                        self.wheel_overshot_softener = nav_functions.saturate_signal(self.wheel_overshot_softener, 1.0)                    
+                        self.command_velocity.angular.z = nav_functions.saturate_signal(candidate_angular_vel * self.wheel_overshot_softener, PlatformConstants.CENTER_AND_APPROACH_ANGULAR_SATURATION_VAL)
+                        self.prev_angular_velocity = candidate_angular_vel                                        
+                        self.arrived_counter = 0
+                    elif self.distance_error > PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:
+                        candidate_linear_vel = self.distance_error * self.kp_distance_error
+                        self.command_velocity.linear.x = nav_functions.saturate_signal(candidate_linear_vel, PlatformConstants.CENTER_AND_APPROACH_LINEAR_SATURATION_VAL)                                        
+                        self.arrived_counter = 0
+                        #self.center_and_approach_ended_publisher.publish(False)                
+                    elif self.distance_error <= PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:                    
+                        #self.center_and_approach_ended_publisher.publish(True)                    
+                        self.arrived_counter += 1
+                    self.command_velocity_publisher.publish(self.command_velocity)
 
 
-                # here we predict the next aruco pose so that if the camera lost arucos sight control still works
-                current_run_time = time.time()
-                current_angle_between_robot_and_aruco = nav_functions.angle_to_only_possitive( np.arctan2(self.aruco_position.y, self.aruco_position.x) )
-                next_angle_between_robot_and_aruco = current_angle_between_robot_and_aruco - self.command_velocity.angular.z*(current_run_time - self.prev_run_time)
-                next_aruco_x_position = self.aruco_position.x - self.command_velocity.linear.x*(current_run_time - self.prev_run_time) 
-                next_aruco_y_position = np.tan(next_angle_between_robot_and_aruco)*next_aruco_x_position             
-                self.aruco_position.x = next_aruco_x_position
-                self.aruco_position.y = next_aruco_y_position  
-                
+                    # here we predict the next aruco pose so that if the camera lost arucos sight control still works
+                    current_run_time = time.time()
+                    current_angle_between_robot_and_aruco = nav_functions.angle_to_only_possitive( np.arctan2(self.aruco_position.y, self.aruco_position.x) )
+                    next_angle_between_robot_and_aruco = current_angle_between_robot_and_aruco - self.command_velocity.angular.z*(current_run_time - self.prev_run_time)
+                    next_aruco_x_position = self.aruco_position.x - self.command_velocity.linear.x*(current_run_time - self.prev_run_time) 
+                    next_aruco_y_position = np.tan(next_angle_between_robot_and_aruco)*next_aruco_x_position             
+                    self.aruco_position.x = next_aruco_x_position
+                    self.aruco_position.y = next_aruco_y_position  
+                except AttributeError:
+                    pass
                 
 
 if __name__ == "__main__":
