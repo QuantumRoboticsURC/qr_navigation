@@ -19,7 +19,7 @@ class CenterAndApproach():
         self.command_velocity_publisher = rospy.Publisher('/center_and_approach_cmd_vel', Twist, queue_size=1)        
         # ___ gains initialization ___
         # self.kp_angle_error = -0.00125   # comes from .4[rad/s] = +-320 [max error pixels] * kpae 
-        self.kp_angle_error = PlatformConstants.CENTER_AND_APPROACH_ANGULAR_KP
+        self.kp_angle_error = PlatformConstants.CENTER_AND_APPROACH_ANGULAR_KP # TODO check kp angle
         self.kp_distance_error = PlatformConstants.CENTER_AND_APPROACH_LINEAR_KP    # comes from  1[rad/s] = +-5 [max error meters] * kpde
         # ___ error initialization ___
         self.angle_error = None
@@ -58,7 +58,7 @@ class CenterAndApproach():
             self.calculate_error() 
 
     def calculate_error(self):
-        self.angle_error = self.aruco_position.y  
+        self.angle_error = np.arctan(self.aruco_position.y / self.aruco_position.x)  
         self.distance_error = self.aruco_position.x - PlatformConstants.CENTER_AND_APPROACH_LINEAR_SET_POINT                
 
     def main(self):
@@ -97,12 +97,15 @@ class CenterAndApproach():
 
                     # here we predict the next aruco pose so that if the camera lost arucos sight control still works
                     current_run_time = time.time()
-                    current_angle_between_robot_and_aruco = nav_functions.angle_to_only_possitive( np.arctan2(self.aruco_position.y, self.aruco_position.x) )
-                    next_angle_between_robot_and_aruco = current_angle_between_robot_and_aruco - self.command_velocity.angular.z*(current_run_time - self.prev_run_time)
+                    current_angle_between_robot_and_aruco = np.arctan(self.aruco_position.y / self.aruco_position.x)
                     next_aruco_x_position = self.aruco_position.x - self.command_velocity.linear.x*(current_run_time - self.prev_run_time) 
-                    next_aruco_y_position = np.tan(next_angle_between_robot_and_aruco)*next_aruco_x_position             
                     self.aruco_position.x = next_aruco_x_position
+                    
+                    
+                    next_angle_between_robot_and_aruco = current_angle_between_robot_and_aruco + self.command_velocity.angular.z*(current_run_time - self.prev_run_time)
+                    next_aruco_y_position = np.tan(next_angle_between_robot_and_aruco)*next_aruco_x_position             
                     self.aruco_position.y = next_aruco_y_position  
+
                 except AttributeError:
                     pass
                 
