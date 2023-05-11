@@ -66,7 +66,7 @@ class NavigationController():
         print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
         print("target type is {t}".format(t = self.target_point_type))
 
-        #self.reset_follow_gps()
+        self.reset_follow_gps()
 
 
     def reset_follow_gps(self):
