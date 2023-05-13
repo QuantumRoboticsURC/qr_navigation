@@ -27,14 +27,7 @@ from qr_navigation.srv import *
 class FollowGPS():
     def __init__(self):
         rospy.init_node("follow_gps")
-
-        rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
-        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
-
-        rospy.Service("Reset_follow_gps", reset_follow_gps, self.callback_reset_follow_gps)
-
-        self.gps_arrived_pub = rospy.Publisher("/gps_arrived", Bool, queue_size = 1)
-        self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
+        
         self.vel_msg = Twist()
 
         self.gps_target_file = PlatformConstants.GPS_TARGET_CSV_PATH
@@ -52,6 +45,14 @@ class FollowGPS():
         self.linear_kp = PlatformConstants.FOLLOW_GPS_LINEAR_KP
 
         self.rate = rospy.Rate(20)
+
+        rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
+
+        rospy.Service("Reset_follow_gps", reset_follow_gps, self.callback_reset_follow_gps)
+
+        self.gps_arrived_pub = rospy.Publisher("/gps_arrived", Bool, queue_size = 1)
+        self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
 
     def callback_reset_follow_gps(self, req):
         self.reset_values()

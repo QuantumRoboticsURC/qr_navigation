@@ -14,13 +14,8 @@ class CenterAndApproach():
     def __init__(self):
         # ___ ros atributes initialization ___
         rospy.init_node("center_and_approach")
-        rospy.Subscriber("/closest_aruco_distance", Point, self.aruco_position_callback, queue_size=1)
-        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
-        #rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
-        self.center_and_approach_ended_publisher = rospy.Publisher('/center_and_approach_ended', Bool, queue_size=1)
-        self.command_velocity_publisher = rospy.Publisher('/center_and_approach_cmd_vel', Twist, queue_size=1)        
-        # ___ gains initialization ___
-        # self.kp_angle_error = -0.00125   # comes from .4[rad/s] = +-320 [max error pixels] * kpae 
+
+        # ___ gains initialization ___        
         self.kp_angle_error = PlatformConstants.CENTER_AND_APPROACH_ANGULAR_KP # TODO check kp angle
         self.kp_distance_error = PlatformConstants.CENTER_AND_APPROACH_LINEAR_KP    # comes from  1[rad/s] = +-5 [max error meters] * kpde
 
@@ -41,15 +36,10 @@ class CenterAndApproach():
 
         self.last_aruco_position_message_time = None
 
-    """
-    def imu_and_gps_data_callback(self, data):
-        if self.started:
-            if self.current_angle == None:
-                self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )
-            else:
-                self.previous_angle = self.current_angle
-                self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )                
-    """
+        rospy.Subscriber("/closest_aruco_distance", Point, self.aruco_position_callback, queue_size=1)
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)        
+        self.center_and_approach_ended_publisher = rospy.Publisher('/center_and_approach_ended', Bool, queue_size=1)
+        self.command_velocity_publisher = rospy.Publisher('/center_and_approach_cmd_vel', Twist, queue_size=1)
                                 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
