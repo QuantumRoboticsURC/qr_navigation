@@ -122,7 +122,7 @@ class RotateWhileDetectingAr():
                 else:                
                     self.pub_detected.publish(False)
                     self.pub_rotate_while_detecting_ar_ended.publish(False)                    
-                    self.cmd_vel_msg.angular.z = PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL - float(np.random.randint(0,10))*(0.2)*(PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL)
+                    self.cmd_vel_msg.angular.z = PlatformConstants.ROTATE_WHILE_DETECTING_AR_ANGULAR_VEL
                 self.cmd_vel_pub.publish(self.cmd_vel_msg)            
             self.rate.sleep()
 
