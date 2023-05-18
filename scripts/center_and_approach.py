@@ -8,7 +8,7 @@ from constants import PlatformConstants
 from std_msgs.msg import Bool, String
 from geometry_msgs.msg import Point, Twist
 from nav_msgs.msg import Odometry
-
+from qr_navigation.srv import *
 
 class CenterAndApproach():
     def __init__(self):
@@ -40,6 +40,29 @@ class CenterAndApproach():
         rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)        
         self.center_and_approach_ended_publisher = rospy.Publisher('/center_and_approach_ended', Bool, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/center_and_approach_cmd_vel', Twist, queue_size=1)
+
+        rospy.Service("ResetCenterAndAproach", ResetCenterAndAproach, self.callback_reset_center_and_aproach)
+
+    def callback_reset_center_and_aproach(self, req):
+        self.reset_values()
+        print("Center and aproach reseted successfully")
+        return ResetCenterAndAproachResponse(True)
+    
+    def reset_values(self):
+        
+        self.angle_error = None
+        self.distance_error = None        
+
+        self.command_velocity = Twist()
+        self.prev_angular_velocity = 0.0
+        self.wheel_overshot_softener = 1.0
+        self.overshoot_softener_value_changed_time = 0.0
+        
+        self.aruco_position = None
+        self.started = False        
+        self.arrived_counter = 0                        
+
+        self.last_aruco_position_message_time = None
                                 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
