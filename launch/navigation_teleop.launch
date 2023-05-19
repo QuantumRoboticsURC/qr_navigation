@@ -1,0 +1,5 @@
+<launch>
+  <node name="teleop_keyb" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
+  <node name="matrix_blue" pkg="matrix_implementations" type="MatrixSignalOnlyBlue.py" output="screen"/>    
+  <!-- <node name="pose_info" pkg="qr_navigation" type="odom_publisher.py" output="screen"/>   -->
+</launch>
