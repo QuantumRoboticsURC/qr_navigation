@@ -60,6 +60,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   reset_follow_gps.srv
+  ResetCenterAndAproach.srv
 )
 
 ## Generate actions in the 'action' folder

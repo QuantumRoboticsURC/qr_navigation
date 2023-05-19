@@ -27,14 +27,7 @@ from qr_navigation.srv import *
 class FollowGPS():
     def __init__(self):
         rospy.init_node("follow_gps")
-
-        rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
-        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
-
-        rospy.Service("Reset_follow_gps", reset_follow_gps, self.callback_reset_follow_gps)
-
-        self.gps_arrived_pub = rospy.Publisher("/gps_arrived", Bool, queue_size = 1)
-        self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
+        
         self.vel_msg = Twist()
 
         self.gps_target_file = PlatformConstants.GPS_TARGET_CSV_PATH
@@ -52,6 +45,14 @@ class FollowGPS():
         self.linear_kp = PlatformConstants.FOLLOW_GPS_LINEAR_KP
 
         self.rate = rospy.Rate(20)
+
+        rospy.Subscriber("/combined_odom", Odometry, self.imu_and_gps_data_callback)        
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1)
+
+        rospy.Service("Reset_follow_gps", reset_follow_gps, self.callback_reset_follow_gps)
+
+        self.gps_arrived_pub = rospy.Publisher("/gps_arrived", Bool, queue_size = 1)
+        self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)        
 
     def callback_reset_follow_gps(self, req):
         self.reset_values()
@@ -97,7 +98,7 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )
-                # self.current_angle = self.current_angle -30.0 # TODO remove this                                                
+                self.current_angle = (self.current_angle + PlatformConstants.FOLLOW_GPS_IMU_OFFSET)%360.0 # TODO remove this                                                
                 while True:
                     try:
                         self.read_target()
@@ -111,7 +112,7 @@ class FollowGPS():
                                                                    self.initial_position_ll_2d[0],
                                                                    self.initial_position_ll_2d[1])
                 self.current_angle = nav_functions.calculate_yaw_angle_deg( data.pose.pose.orientation )
-                # self.current_angle = self.current_angle -30.0 # TODO remove this                                 
+                self.current_angle = (self.current_angle + PlatformConstants.FOLLOW_GPS_IMU_OFFSET)%360.0                          
             #print("CURRENT_ANGLE: {}".format(self.current_angle))
     
     def main(self):

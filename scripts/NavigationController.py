@@ -66,7 +66,8 @@ class NavigationController():
         print("target is {t}".format(t = (self.target_latitude, self.target_longitude)))
         print("target type is {t}".format(t = self.target_point_type))
 
-        self.reset_follow_gps()
+        #self.reset_follow_gps()
+        #self.reset_center_and_aproach()
 
 
     def reset_follow_gps(self):
@@ -75,6 +76,17 @@ class NavigationController():
             resetFollowGps = rospy.ServiceProxy("Reset_follow_gps", reset_follow_gps)
             response = resetFollowGps()
             print("Follow GPS reseted successfully")
+            return response.success
+        
+        except rospy.ServiceException as e:
+            print("Service call failed: %s"%e)
+
+    def reset_center_and_aproach(self):
+        rospy.wait_for_service("ResetCenterAndAproach")
+        try:
+            resetFollowGps = rospy.ServiceProxy("ResetCenterAndAproach", ResetCenterAndAproach)
+            response = resetFollowGps()
+            print("Center And Aproach reseted successfully")
             return response.success
         
         except rospy.ServiceException as e:

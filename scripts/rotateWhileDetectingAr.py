@@ -11,14 +11,7 @@ import numpy as np
 
 class RotateWhileDetectingAr():
     def __init__(self):
-        rospy.init_node("rotate_while_detecting_ar")
-        rospy.Subscriber("/combined_odom", Odometry, self.imu_pose_callback)
-        rospy.Subscriber("/closest_aruco_distance", Point, self.ar_detected_callback, queue_size=1)        
-        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1) 
-
-        self.pub_detected = rospy.Publisher("/ar_detected", Bool, queue_size = 1)
-        self.pub_rotate_while_detecting_ar_ended = rospy.Publisher("/rotate_while_detecting_ar_ended", Bool, queue_size = 1)
-        self.cmd_vel_pub = rospy.Publisher("/rotate_while_detecting_ar_cmd_vel", Twist, queue_size=1)        
+        rospy.init_node("rotate_while_detecting_ar")        
 
         self.cmd_vel_msg = Twist()
         self.num_turns = 0.85
@@ -32,7 +25,15 @@ class RotateWhileDetectingAr():
 
         self.reference_frame_z_points_up = PlatformConstants.REFERENCE_FRAME_Z_AXIS_POINTS_UP
 
-        self.rate = rospy.Rate(5.0)                                
+        self.rate = rospy.Rate(5.0)
+
+        rospy.Subscriber("/combined_odom", Odometry, self.imu_pose_callback)
+        rospy.Subscriber("/closest_aruco_distance", Point, self.ar_detected_callback, queue_size=1)        
+        rospy.Subscriber("/control_node_in_turn", String, self.turn_checker_callback, queue_size=1) 
+
+        self.pub_detected = rospy.Publisher("/ar_detected", Bool, queue_size = 1)
+        self.pub_rotate_while_detecting_ar_ended = rospy.Publisher("/rotate_while_detecting_ar_ended", Bool, queue_size = 1)
+        self.cmd_vel_pub = rospy.Publisher("/rotate_while_detecting_ar_cmd_vel", Twist, queue_size=1)                                        
 
     def turn_checker_callback(self, data):
         control_node_in_turn = data.data
