@@ -84,8 +84,8 @@ class NavigationController():
     def reset_center_and_aproach(self):
         rospy.wait_for_service("ResetCenterAndAproach")
         try:
-            resetFollowGps = rospy.ServiceProxy("ResetCenterAndAproach", ResetCenterAndAproach)
-            response = resetFollowGps()
+            resteCenterAndApproach = rospy.ServiceProxy("ResetCenterAndAproach", ResetCenterAndAproach)
+            response = resteCenterAndApproach()
             print("Center And Aproach reseted successfully")
             return response.success
         

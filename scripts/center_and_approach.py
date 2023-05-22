@@ -71,18 +71,6 @@ class CenterAndApproach():
         else:            
             self.reset_values()
 
-    def reset_values(self):
-        self.angle_error = None
-        self.distance_error = None
-        self.command_velocity = Twist()
-        self.prev_angular_velocity = 0.0
-        self.wheel_overshot_softener = 1.0
-        self.overshoot_softener_value_changed_time = 0.0        
-        self.aruco_position = None
-        self.started = False        
-        self.arrived_counter = 0               
-        self.last_aruco_position_message_time = None
-
     def aruco_position_callback(self, data):        
         print("NEW ARUCO POSITION")
         self.aruco_position = data
