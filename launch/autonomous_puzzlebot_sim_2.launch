@@ -1,10 +1,12 @@
  <launch>
   <node name="follow_gps" pkg="qr_navigation" type="follow_gps3.py" output="screen"/>
   <node name="rotateWhileDetectingAr" pkg="qr_navigation" type="rotateWhileDetectingAr.py" output="screen"/>
-  <arg name="simulation" default = "true"> 
+
+  <arg name="simulation" default = "true"/> 
   <node name="detect_aruco_video_3" pkg="zed-implementations" type="detect_aruco_video_3.py" output="screen" clear_params="true">
   <param name="simulation" value="$(arg simulation)"/>
   </node>
+
   <node name="center_and_approach" pkg="qr_navigation" type="center_and_approach.py" output="screen"/>
     
   <node name="goal_marker_spawner" pkg="qr_navigation" type="spawn_goal_position_marker2.py" output="screen"/>    
