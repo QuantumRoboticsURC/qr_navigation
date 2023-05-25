@@ -93,6 +93,10 @@ class CenterAndApproach():
                     if self.arrived_counter >= 5:
                         self.center_and_approach_ended_publisher.publish(True)
 
+                    if self.distance_error <= PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:                    
+                        #self.center_and_approach_ended_publisher.publish(True)                    
+                        self.arrived_counter += 1
+                    
                     if abs(self.angle_error) > PlatformConstants.CENTER_AND_APPROACH_ANGULAR_ERROR_TRESHOLD:
                         """
                         candidate_angular_vel = self.angle_error * self.kp_angle_error
@@ -110,10 +114,7 @@ class CenterAndApproach():
                         candidate_linear_vel = self.distance_error * self.kp_distance_error
                         self.command_velocity.linear.x = nav_functions.saturate_signal(candidate_linear_vel, PlatformConstants.CENTER_AND_APPROACH_LINEAR_SATURATION_VAL)                                        
                         self.arrived_counter = 0
-                        #self.center_and_approach_ended_publisher.publish(False)                
-                    elif self.distance_error <= PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:                    
-                        #self.center_and_approach_ended_publisher.publish(True)                    
-                        self.arrived_counter += 1
+                        #self.center_and_approach_ended_publisher.publish(False)                                    
                     self.command_velocity_publisher.publish(self.command_velocity)
 
 
@@ -135,8 +136,8 @@ class CenterAndApproach():
                         elif self.distance_error > PlatformConstants.CENTER_AND_APPROACH_LINEAR_ERROR_TRESHOLD:        
                             print("APPLING TRACKER LINEAR")
                             #current_angle_between_robot_and_aruco = np.arctan(self.aruco_position.y / self.aruco_position.x)                
-                            #current_linear_vel = PlatformConstants.CENTER_AND_APPROACH_DINAMIC_MODEL_SCALING_LINEAR_VEL*(self.command_velocity.linear.x)
-                            next_aruco_x_position = self.aruco_position.x - (self.command_velocity.linear.x*delta_t)
+                            current_linear_vel = PlatformConstants.CENTER_AND_APPROACH_DINAMIC_MODEL_SCALING_LINEAR_VEL*(self.command_velocity.linear.x)
+                            next_aruco_x_position = self.aruco_position.x - (current_linear_vel*delta_t)
                             #next_aruco_x_position = self.aruco_position.x - (current_linear_vel*delta_t)*np.cos(current_angle_between_robot_and_aruco)
                             #next_aruco_y_position = self.aruco_position.y + (current_linear_vel*delta_t)*np.sin(current_angle_between_robot_and_aruco)                             
                             self.aruco_position.x = next_aruco_x_position
