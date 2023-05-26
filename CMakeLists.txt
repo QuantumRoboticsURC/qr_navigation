@@ -61,6 +61,7 @@ add_service_files(
   FILES
   reset_follow_gps.srv
   ResetCenterAndAproach.srv
+  ObstacleAvoidanceRoutineService.srv
 )
 
 ## Generate actions in the 'action' folder
