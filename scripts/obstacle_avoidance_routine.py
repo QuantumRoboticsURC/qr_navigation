@@ -25,7 +25,7 @@ class ObstacleAvoidanceRoutine():
 
         rospy.Service("avoid_obstacle", ObstacleAvoidanceRoutineService, self.avoid_obstacle_response)
 
-        self.vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)       
+        self.vel_pub = rospy.Publisher("/follow_gps_cmd_vel", Twist, queue_size=1)       
         
         self.linear_vel_conversion_factor = 0.57
         self.angular_vel_conversion_factor = 0.4
@@ -46,9 +46,9 @@ class ObstacleAvoidanceRoutine():
             self.move_by_time(5.0, roll_sign*(-0.31416), 0.0) # Turn right -90 deg
             self.move_by_time(10.0, 0.0, 0.5) # Go front 5 m
         elif req.case_num == 2 or req.case_num == 3:
-            self.move_by_time(5.0, 0.0, -0.2) # Reverse 1 m
+            self.move_by_time(2.5, 0.0, -0.8) # Reverse 1 m
             self.move_by_time(5.0, 0.31416, 0.0) # Turn right -90 deg
-            self.move_by_time(10.0, 0.0, 0.5) # Go front 5 m     
+            self.move_by_time(5.0, 0.0, 0.5) # Go front 5 m     
 
         return ObstacleAvoidanceRoutineServiceResponse(True)      
   

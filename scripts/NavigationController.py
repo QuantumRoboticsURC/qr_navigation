@@ -17,6 +17,7 @@ import pandas as pd
 import sched, time
 from geometry_msgs.msg import Point, Twist
 from std_msgs.msg import Bool, Int8, String
+from sensor_msgs.msg import NavSatFix
 from gps_tranforms import alvinxy as gps_transforms
 from constants import PlatformConstants
 from qr_navigation.srv import *
@@ -35,6 +36,8 @@ class NavigationController():
         self.control_node_in_turn_pub = rospy.Publisher('/control_node_in_turn', String, queue_size=1)
         self.command_velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.matrix_signal_publisher = rospy.Publisher('/matrix_signal', Int8, queue_size=1)
+        self.goal_cords_publisher = rospy.Publisher('/ublox/gps_goal', NavSatFix, queue_size=1)
+
 
         self.gps_target_file = PlatformConstants.GPS_TARGET_CSV_PATH
         self.gps_arrived = False
@@ -56,6 +59,7 @@ class NavigationController():
         self.snail_trayectory_gps_points = []
         self.snail_trayectory_index = -1
         self.autonomous_navigation_ended = False
+        self.mapviz_goal_msg = NavSatFix()
         
         #TODO - enable the next user input functions to work with arrow keys and control copy 
         self.get_gps_target()
@@ -213,7 +217,11 @@ class NavigationController():
                     self.control_node_in_turn_pub.publish("follow_gps")
                     self.command_velocity_publisher.publish(self.follow_gps_vel)
                     self.matrix_signal_msg.data = 2 # change matrix to red 
-                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)                
+                    self.matrix_signal_publisher.publish(self.matrix_signal_msg)
+                    self.mapviz_goal_msg.longitude = self.target_longitude
+                    self.mapviz_goal_msg.latitude = self.target_latitude    
+                    self.goal_cords_publisher.publish(self.mapviz_goal_msg)         
+
                 else:
                     if self.target_point_type == "gps_only":
                         self.command_velocity_publisher.publish(self.stop_vel)

@@ -17,6 +17,19 @@ def calculate_yaw_angle_deg(orientation_q):
     yaw = angle_to_only_possitive_deg(yaw)
     return yaw  
 
+def calculate_pitch_angle_deg(orientation_q):
+    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+    (_, pitch, _) = euler_from_quaternion(orientation_list)
+    pitch = pitch*(180.0/math.pi)                
+    return pitch  
+
+def calculate_roll_angle_deg(orientation_q):
+    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+    (roll, _, _) = euler_from_quaternion(orientation_list)
+    roll = roll*(180.0/math.pi)                
+    return roll  
+
+
 def angle_to_only_possitive_deg(angle):
     theta = angle
     if np.sign(theta) == -1.0:
